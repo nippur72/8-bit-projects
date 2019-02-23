@@ -111,9 +111,9 @@ Al testo inserito da tastiera aggiungiamo degli spazi di separazione ed il termi
 
 `BASIC START` e `BASIC END` sono i comandi di ASMPROC che delimitano il sorgente Basic, separandolo dal codice assembly vero e proprio. All'interno del sorgente BASIC è possibile riferirsi alle variabili usate nell'assembly, come `{testo}`, `{VIDEO_RAM}` e `{main}` alle linee 40 e 80.
 
-La costante `VIDEO_RAM` è definita nel file `c64.lm` e vale 1024, ossia l'inizio dello schermo del C64, mentre `testo` è il buffer che abbiamo definito sopra.
+La costante `VIDEO_RAM` è definita nel file `c64.lm` e vale 1024 ossia l'inizio dello schermo del C64, mentre `testo` è il buffer che abbiamo definito sopra.
 
-Le ultime righe preparano lo schermo (60,70) e richiamano la routine in assembly (linea 80).
+Le ultime righe preparano lo schermo (linee 60,70) e richiamano la routine in assembly (linea 80).
 
 Definiamo ora le altre variabili che useremo nella routine:
 
@@ -243,7 +243,7 @@ Se fosse in linguaggio C sarebbe:
    A = testo[testo_idx];
    address = A * 8 + ROMCHAR;
 ```
-Che in assembly diventa:
+In assembly diventa:
 ```
 SUB calcola_address_carattere() 
    ; legge il carattere: A = testo[testo_idx]
@@ -294,7 +294,7 @@ relativa istruzione `CMP #0`.
 
 ## Calcolo del valore del pixel
 
-Adesso in `address` abbiamo l'indirizzo in ROM del caratere ed in `line`
+Adesso in `address` abbiamo l'indirizzo in ROM del carattere ed in `line`
 la riga, ossia l'offset verticale all'interno del carattere. Questo ci
 consente di leggere il byte che contiente tutti gli 8 pixel che compongono 
 una riga. A noi però serve un solo pixel, quello indicato da `bit_counter`.
@@ -328,7 +328,7 @@ La maschera di bit si calcola quindi come:
    sta mask
 ```
 
-Le righe che seguono leggono la linea `line`, eseguono l'operazione di AND
+Le righe che seguono leggono la linea `line`, eseguono l'operazione di AND con la maschera di bit
 e trasformano il pixel risultante in carattere `REVERSE_SPACE` (se 1) o
 `SPACE` (se 0).
 ```   
@@ -514,19 +514,20 @@ Sebbene siamo tentati ad inserire un banale ciclo di ritardo
 (tipo FOR NEXT del basic), possiamo fare qualcosa di più scientifico:
 possiamo regolare la nostra temporizzazione con il RASTER del video.
 
-Nel C64 il raster è semplicemente il numero di riga (bordi compresi) 
-che il chip video sta disegnando (detta anche "scanline").
+Nel C64 il raster è semplicemente una locazione di memoria che contiente
+il numero di riga (bordi compresi) che il chip video sta disegnando 
+in quel preciso momento.
 
 La nostra pausa consisterà semplicemente nell'aspettare che 
-il pennello del raster raggiunga una certa linea prefissata. Ad esempio:
+il raster raggiunga una certa linea prefissata. Ad esempio:
 
 ```
-   do : loop while RASTER!=#200
+   do : loop while RASTER <> #200
 ```
 
 (La costante `RASTER` è definita nel file `c64.lm` e vale `$d012`).
 
-Poichè il pennello passa dalla stessa linea 50 volte al secondo, la nostra
+Poichè il pennello del raster passa dalla stessa linea 50 volte al secondo, la nostra
 animazione scrollerà esattamente 50 volte in un secondo. E poichè
 lo schermo è composto da circa 40 colonne, vedremo il testo apparire a destra e 
 scomparire a sinistra in poco meno di un secondo (40/50 = 0.8 sec. per l'esattezza).
@@ -547,10 +548,10 @@ Per vedere l'effetto tearing basta modificare il valore da 200 ad esempio a 120.
 ![tearing](tearing.png)
 
 Nell'esecuzione di simili routine agganciate al raster, è importante farsi un'idea del
-tempo di esecuzione della routine stessa. Basta semplicemente cambiare il colore
+tempo di esecuzione della routine stessa. Per far ciò, basta semplicemente cambiare il colore
 del bordo dello schermo ad inizio routine (ad esempio rosso) e ripristinarlo a fine routine.
-Questo consente di "saggiare" ad occhio la durata della routine e il suo impatto 
-nei confronti del frame rate (ad esempio in un ipotetico video game).
+Questo consente di "saggiare" la durata della routine e il suo impatto 
+nei confronti del singolo frame (ad esempio in un ipotetico video game).
 
 ![raster](raster.png)
 

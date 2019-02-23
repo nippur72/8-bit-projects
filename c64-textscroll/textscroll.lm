@@ -58,7 +58,7 @@ ripeti:
    ; 200 è una linea subito dopo la zona della scritta gigante
 
    ;set_border #COLOR_CYAN   
-   do : loop while RASTER!=#200
+   do : loop while RASTER <> #200
    ;set_border #COLOR_RED
 
    jsr scrolla_scritta             ; scrolla la scritta gigante a sinistra
