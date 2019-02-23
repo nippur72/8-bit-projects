@@ -1,0 +1,305 @@
+; include useful macros
+include "macros_16.lm"
+include "macros.lm"
+include "c64.lm"
+
+   processor 6502
+   org BASIC_RAM
+
+; =========================================================
+; Chiede in input una stringa, gli aggiunge spazi 
+; e carattere terminatore, la converte in PETSCII
+; e la scrive nel buffer {testo}
+; Prepara lo schermo e chiama la soubroutine in assembly
+; =========================================================
+
+BASIC START compact  
+   10 input "{white}testo";a$
+   15 a$ = a$ + "        @"
+   20 for t=1 to len(a$)
+   30    print "{home}";mid$(a$,t,1)
+   40    poke {testo}+t-1, peek({VIDEO_RAM})
+   50 next
+   60 print "{yellow}{clr}"
+   70 poke 53280,0:poke 53281,0   
+   80 sys {main}   
+BASIC END
+
+; =========
+; VARIABILI
+; =========
+
+; puntatore (2 bytes) in pagina zero usata per leggere nella ROM caratteri
+address = 252
+
+testo       DS 255    ; buffer di memoria (255 caratteri) dove risiede la stringa da visualizzare
+testo_idx   byte 0    ; indice del carattere all'interno della stringa
+line        byte 0    ; (0-7) linea durante la stampa del carattere
+bit_counter byte 0    ; (0-7) conta quale colonna (bit) del carattere si sta stampando
+
+; ==========================================================================
+; Name: main
+; Purpose: routine principale che scrolla le scritte a sinistra e disegna
+;          la parte mancante a destra
+; ==========================================================================
+
+SUB main()
+
+   ; disabilita gli interrupt durante la routine per evitare il "tearing" della scritta
+   cli
+
+   ; inizializza   
+   ld testo_idx, #0        ; parte dal primo carattere nella stringa
+   ld bit_counter, #0      ; parte dal bit più a sinistra
+
+ripeti:
+   ; attende il raster alla linea 200 per evitare 
+   ; il tearing e per rallentare lo scroll
+   ; 200 è una linea subito dopo la zona della scritta gigante
+      
+   do : loop while RASTER!=#200
+
+   jsr scrolla_scritta             ; scrolla la scritta gigante a sinistra
+   jsr calcola_address_carattere   ; calcola indirizzo nella ROM del carattere
+   jsr disegna_striscia_verticale  ; disegna la striscia verticale a destra
+   jsr avanza                      ; avanza alla prossima striscia e/o carattere
+
+   ; loopa
+   jmp ripeti
+
+END SUB
+
+; ==========================================================================
+; Name: scrolla_scritta
+; Purpose: scrolla a sinistra la parte di schermo dove appare la scritta
+; Input: niente
+; Returns: niente
+; Uses: X
+; ==========================================================================
+SUB scrolla_scritta()
+   ldx #0
+   do
+      lda SCROLL_ROW0+1,x : sta SCROLL_ROW0,x
+      lda SCROLL_ROW1+1,x : sta SCROLL_ROW1,x
+      lda SCROLL_ROW2+1,x : sta SCROLL_ROW2,x
+      lda SCROLL_ROW3+1,x : sta SCROLL_ROW3,x
+      lda SCROLL_ROW4+1,x : sta SCROLL_ROW4,x
+      lda SCROLL_ROW5+1,x : sta SCROLL_ROW5,x
+      lda SCROLL_ROW6+1,x : sta SCROLL_ROW6,x
+      lda SCROLL_ROW7+1,x : sta SCROLL_ROW7,x
+      inx
+   loop while x <> #SCREEN_COLS-1
+END SUB
+
+; altezza della scritta gigante: 8 righe
+const TEXT_HEIGHT = 8
+
+; riga di inizio della scritta gigante
+const SCROLL_START_ROW = [SCREEN_ROWS - TEXT_HEIGHT]/2
+
+; l'indirizzo video delle 8 righe della scritta gigante
+const SCROLL_ROW0 = VIDEO_RAM + [[SCROLL_START_ROW+$0] * SCREEN_COLS]
+const SCROLL_ROW1 = VIDEO_RAM + [[SCROLL_START_ROW+$1] * SCREEN_COLS]
+const SCROLL_ROW2 = VIDEO_RAM + [[SCROLL_START_ROW+$2] * SCREEN_COLS]
+const SCROLL_ROW3 = VIDEO_RAM + [[SCROLL_START_ROW+$3] * SCREEN_COLS]
+const SCROLL_ROW4 = VIDEO_RAM + [[SCROLL_START_ROW+$4] * SCREEN_COLS]
+const SCROLL_ROW5 = VIDEO_RAM + [[SCROLL_START_ROW+$5] * SCREEN_COLS]
+const SCROLL_ROW6 = VIDEO_RAM + [[SCROLL_START_ROW+$6] * SCREEN_COLS]
+const SCROLL_ROW7 = VIDEO_RAM + [[SCROLL_START_ROW+$7] * SCREEN_COLS]
+
+
+; ==========================================================================
+; Name: calcola_address_carattere
+; Purpose: calcola l'indirizzo nella ROM del carattere
+;          ossia: address = ROMCHAR + char*8
+; Input: char
+; Returns: address
+; Uses: A
+; ==========================================================================
+SUB calcola_address_carattere() 
+   ; legge il carattere: A = testo[testo_idx]
+   ldx testo_idx
+   lda testo,x   
+   
+   ; scrive il carattere letto in address 
+   sta address
+
+   ; rende address una word a 16 bit riempiendo con 0 il byte alto
+   ; in pratica sarà: address = A;
+   ld address+1, #0
+
+   ; moltiplica address per 8
+   shl16 address
+   shl16 address
+   shl16 address
+
+   ; aggiunge l'indirizzo di base della ROM
+   add16 address, #ROMCHAR   
+END SUB
+
+; ==========================================================================
+; Name: calcola_valore_pixel
+; Purpose: calcola il valore del pixel del carattere da scrivere sulla parte
+;          destra dello schermo. 
+;          Il pixel è quello puntato da: address[line] & (1 << bit_counter)
+; Input: bit_counter, address, line
+; Returns: pixel = REVERSE_SPACE se il pixel è 1, 32 (spazio) altrimenti
+; Uses: A, X, Y
+; Nota: per velocizzare il calcolo di (1 << bit_counter) viene usata
+;       la tabella precalcolata "masktable"
+; ==========================================================================
+
+; tabella per il calcolo di 1 << bit_counter
+masktable byte 128,64,32,16,8,4,2,1
+
+mask byte 0
+pixel byte 0
+
+const SPACE         = 32            ; carattere per il pixel vuoto
+const REVERSE_SPACE = SPACE + 128   ; carattere per il pixel pieno: uno spazio in reverse
+
+SUB calcola_valore_pixel() 
+
+   ; mask = 1 << bit_counter
+   ldx bit_counter
+   lda masktable,x
+   sta mask
+
+   ; attiva la ROM dei caratteri
+   charset_rom on
+
+   ; A = address[line] AND mask
+   ldy line
+   lda (address),y 
+   and mask
+
+   ; converte il bit nei caratteri "REVERSE_SPACE" o "SPACE" 
+   if zero then
+      ld pixel, #SPACE  
+   else
+      ld pixel, #REVERSE_SPACE
+   end if
+
+   ; spegne la ROM caratteri e ripristina la RAM
+   charset_rom off
+
+END SUB
+
+
+; ==========================================================================
+; Name: disegna_pixel
+; Purpose: disegna il carattere in "pixel" alla linea "line" nella
+;          colonna più a destra dello schermo
+; Input: pixel, line
+; Returns: niente
+; Uses: A, X
+; Notes: l'indirizzo di destinazione è calcolato usando la tabella indicizzata
+;        "rightmost" per comodità divisa in lo e hi byte.
+;        La scrittura nella cella video è fatta mediante
+;        codice automodificante (sintassi **nome() di ASMPROC)
+; ==========================================================================
+SUB disegna_pixel()    
+   ; calcola indirizzo video della linea
+   ; ossia: screen_cell = righmost[line]
+   ldx line
+   lda rightmost_lo,x : sta screen_cell
+   lda rightmost_hi,x : sta screen_cell+1
+
+   ; scrive carattere del "pixel"
+   lda pixel
+   sta **screen_cell(7680)
+END SUB
+
+; l'indirizzo video della colonna più a destra dove fa ingresso il testo
+const RIGHT_POS = SCROLL_ROW0 + SCREEN_COLS - 1 
+
+rightmost_lo:
+   byte [RIGHT_POS + $0 * SCREEN_COLS] MOD 256
+   byte [RIGHT_POS + $1 * SCREEN_COLS] MOD 256
+   byte [RIGHT_POS + $2 * SCREEN_COLS] MOD 256
+   byte [RIGHT_POS + $3 * SCREEN_COLS] MOD 256
+   byte [RIGHT_POS + $4 * SCREEN_COLS] MOD 256
+   byte [RIGHT_POS + $5 * SCREEN_COLS] MOD 256
+   byte [RIGHT_POS + $6 * SCREEN_COLS] MOD 256
+   byte [RIGHT_POS + $7 * SCREEN_COLS] MOD 256
+
+rightmost_hi:
+   byte [RIGHT_POS + $0 * SCREEN_COLS] / 256
+   byte [RIGHT_POS + $1 * SCREEN_COLS] / 256
+   byte [RIGHT_POS + $2 * SCREEN_COLS] / 256
+   byte [RIGHT_POS + $3 * SCREEN_COLS] / 256
+   byte [RIGHT_POS + $4 * SCREEN_COLS] / 256
+   byte [RIGHT_POS + $5 * SCREEN_COLS] / 256
+   byte [RIGHT_POS + $6 * SCREEN_COLS] / 256
+   byte [RIGHT_POS + $7 * SCREEN_COLS] / 256
+
+
+; ==========================================================================
+; Name: disegna_striscia_verticale
+; Purpose: disegna la striscia verticale del carattere nella parte più a
+;          destra dello schermo
+; Input: address
+; Returns: niente
+; ==========================================================================
+SUB disegna_striscia_verticale()
+   ld line, #7
+   do
+      jsr calcola_valore_pixel
+      jsr disegna_pixel
+      dec line
+   loop while not negative
+END SUB
+
+; ==========================================================================
+; Name: avanza
+; Purpose: avanza alla prossima striscia verticale; 
+;          dopo 8 strisce avanza al prossimo carattere
+;          se incontra il terminatore di stringa riparte dall'inizio della stringa
+; Input: testo, testo_idx, bit_counter
+; Returns: niente
+; ==========================================================================
+SUB avanza()
+   ; avanza di un pixel nella striscia del carattere
+   inc bit_counter
+   if bit_counter = #8 then
+      ; se il carattere è completo passa al successivo
+      ld bit_counter, #0
+
+      ; passa alla lettera successiva
+      inc testo_idx
+
+      ; se il testo è finito (incontra uno 0) ricomincia
+      ldx testo_idx
+      lda testo,x
+      if zero then sta testo_idx
+   end if
+END SUB
+
+; Macro per switchare la ROM dei caratteri
+;
+; Info da un post by Attilio Capuozzo
+; https://www.facebook.com/groups/programming.c64/permalink/250877375592525/
+; 
+MACRO charset_rom "on"
+   ; disable interrupt
+   lda 56334
+   and #254
+   sta 56334
+   
+   ; switch bank
+   lda 1
+   and #251
+   sta 1
+END MACRO
+
+MACRO charset_rom "off"
+   ; switch bank
+   lda 1
+   or  #4
+   sta 1
+
+   ; re-enables interrupt
+   lda 56334
+   or #1
+   sta 56334
+END MACRO
