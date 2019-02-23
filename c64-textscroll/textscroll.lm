@@ -15,7 +15,7 @@ include "c64.lm"
 
 BASIC START compact  
    10 input "{white}testo";a$
-   15 a$ = a$ + "        @"
+   15 a$ = a$ + "     @"
    20 for t=1 to len(a$)
    30    print "{home}";mid$(a$,t,1)
    40    poke {testo}+t-1, peek({VIDEO_RAM})
@@ -35,7 +35,7 @@ address = 252
 testo       DS 255    ; buffer di memoria (255 caratteri) dove risiede la stringa da visualizzare
 testo_idx   byte 0    ; indice del carattere all'interno della stringa
 line        byte 0    ; (0-7) linea durante la stampa del carattere
-bit_counter byte 0    ; (0-7) conta quale colonna (bit) del carattere si sta stampando
+bit_counter byte 0    ; (0-7) conta quale colonna di pixel (bit) del carattere si sta stampando
 
 ; ==========================================================================
 ; Name: main
@@ -56,8 +56,10 @@ ripeti:
    ; attende il raster alla linea 200 per evitare 
    ; il tearing e per rallentare lo scroll
    ; 200 è una linea subito dopo la zona della scritta gigante
-      
+
+   ;set_border #COLOR_CYAN   
    do : loop while RASTER!=#200
+   ;set_border #COLOR_RED
 
    jsr scrolla_scritta             ; scrolla la scritta gigante a sinistra
    jsr calcola_address_carattere   ; calcola indirizzo nella ROM del carattere
@@ -152,7 +154,9 @@ END SUB
 ; tabella per il calcolo di 1 << bit_counter
 masktable byte 128,64,32,16,8,4,2,1
 
-mask byte 0
+; contiene la maschera calcolata con masktable
+mask byte 0     
+
 pixel byte 0
 
 const SPACE         = 32            ; carattere per il pixel vuoto
@@ -207,7 +211,7 @@ SUB disegna_pixel()
 
    ; scrive carattere del "pixel"
    lda pixel
-   sta **screen_cell(7680)
+   sta **screen_cell(1024)
 END SUB
 
 ; l'indirizzo video della colonna più a destra dove fa ingresso il testo
@@ -262,7 +266,7 @@ SUB avanza()
    ; avanza di un pixel nella striscia del carattere
    inc bit_counter
    if bit_counter = #8 then
-      ; se il carattere è completo passa al successivo
+      ; dopo la striscia 7 riparte dalla 0
       ld bit_counter, #0
 
       ; passa alla lettera successiva
