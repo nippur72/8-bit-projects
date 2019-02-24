@@ -1,3 +1,6 @@
 c64-textscroll/*.asm
 c64-textscroll/*.lst
 c64-textscroll/*.err
+c64-arturo-dente-game/*.asm
+c64-arturo-dente-game/*.lst
+c64-arturo-dente-game/*.err
