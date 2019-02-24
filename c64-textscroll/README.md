@@ -81,17 +81,18 @@ testo  DS 255  ; buffer di memoria (255 caratteri) dove risiede la stringa da vi
 `DS` in sta per "define space" ossia riserva spazio, 255 bytes in questo caso.
 
 `testo` conterrà dunque la stringa da visualizzare. La fine della stringa la
-identificheremo con uno zero (carattere `@` in PETSCII).
+identificheremo con uno zero.
 
 Per scrivere dentro il buffer `testo` possiamo comodamente usare il BASIC.
 
-L'unico problema è che il BASIC usa l'ASCII mentre la ROM dei caratteri segue l'ordine PETSCII.
+L'unico problema è che il BASIC usa il codice ASCII (PETSCII) mentre nella ROM i 
+caratteri sono disposti secondo l'ordine degli SCREEN CODES del chip video.
 
-Convertiamo da ASCII in PETSCII nel peggior modo possibile: con `PRINT` scriviamo il carattere nella prima cella in alto a destra sullo schermo (linea 30), e poi lo leggiamo con `PEEK` dalla memoria video (linea 40).
+Convertiamo da PETSCII in SCREEN CODES nel peggior modo possibile: con `PRINT` scriviamo il carattere nella prima cella in alto a destra sullo schermo (linea 30), e poi lo leggiamo con `PEEK` dalla memoria video (linea 40).
 
-Il carattere letto con `PEEK` sarà automaticamente convertito in PETSCII. Poi con `POKE` lo scriviamo nel buffer `testo` (linea 40). 
+Il carattere letto con `PEEK` sarà automaticamente convertito in SCREEN CODES. Poi con `POKE` lo scriviamo nel buffer `testo` (linea 40). 
 
-Lascio al lettore trovare un modo più elegante di fare la conversione da ASCII in PETSCII (scrivetelo nei commenti su FB).
+Lascio al lettore trovare un modo più elegante di fare la conversione da ASCII in SCREEN CODES (scrivetelo nei commenti su FB).
 
 ```
 BASIC START compact  
@@ -107,7 +108,8 @@ BASIC START compact
 BASIC END
 ```
 
-Al testo inserito da tastiera aggiungiamo degli spazi di separazione ed il terminatore `@` (linea 15).
+Al testo inserito da tastiera aggiungiamo degli spazi di separazione ed il terminatore `@` 
+che equivale a 0 quando convertito in SCREEN CODES (linea 15).
 
 `BASIC START` e `BASIC END` sono i comandi di ASMPROC che delimitano il sorgente Basic, separandolo dal codice assembly vero e proprio. All'interno del sorgente BASIC è possibile riferirsi alle variabili usate nell'assembly, come `{testo}`, `{VIDEO_RAM}` e `{main}` alle linee 40 e 80.
 
