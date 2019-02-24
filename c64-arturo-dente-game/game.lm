@@ -69,9 +69,20 @@ basic start
    1016 get y$:if y$="" goto 1016 
    1018 if y$="y" then goto 16
    1020 end
-      
+
 basic end
 
+; =========
+; VARIABILI
+; =========
+
+joy   byte 0
+delta byte 0
+posx  byte 0
+posy  byte 0
+
+const spritex = 53248+4
+const spritey = 53248+5
 
 ; =====================================================================
 ; Name: prepara_sprite
@@ -88,18 +99,6 @@ sub prepara_sprite()
       sta 832,x
    next
 end sub  
-
-; =========
-; VARIABILI
-; =========
-
-joy   byte 0
-delta byte 0
-posx  byte 0
-posy  byte 0
-
-const spritex = 53248+4
-const spritey = 53248+5
 
 ; =====================================================================
 ; Name: posizione_iniziale
