@@ -25,11 +25,8 @@ basic start
    78 dim ob
    80 print"{clear}"
    90 v=53248 : rem start of display chip
-   100 poke v+21,4:rem enable sprite 2
-   105 poke 53289,4
-   110 poke 2042,13:rem sprite 2 data from block 13
-   120 delta=3:rem delta pixel di movimento sprite
-   130 for n=0 to 62 : read q : poke 832+n,q : next
+
+   100 sys {prepara_sprite}
    
    // posizione iniziale
    140 sys {posizione_iniziale}
@@ -72,23 +69,37 @@ basic start
    1016 get y$:if y$="" goto 1016 
    1018 if y$="y" then goto 16
    1020 end
-
-   10000 rem 
-   10010 data 0,0,0,0,0,0
-   10020 data 0,0,0,0,0,0
-   10030 data 0,0,0,0,0,0
-   10040 data 0,0,0,0,0,0
-   10050 data 0,0,0,255,255,255
-   10060 data 73,0,146,38,0,100
-   10070 data 16,0,8,8,24,16
-   10080 data 4,36,32,2,36,64
-   10090 data 1,36,128,0,153,0
-   10100 data 0,66,0,0,36,0
-   10110 data 0,24,0
+      
 basic end
 
+
+; =====================================================================
+; Name: prepara_sprite
+; Purpose: attiva lo sprite 2 e ne carica la grafica
+; =====================================================================
+
+sub prepara_sprite()
+   ld 53248+21, #4    ; enable sprite 2
+   ld 53289, #4
+   ld 2042, #13       ; sprite 2 data from block 13
+
+   for x=#0 to #62
+      lda sprite_data,x
+      sta 832,x
+   next
+end sub  
+
+; =========
+; VARIABILI
+; =========
+
+joy   byte 0
+delta byte 0
 posx  byte 0
 posy  byte 0
+
+const spritex = 53248+4
+const spritey = 53248+5
 
 ; =====================================================================
 ; Name: posizione_iniziale
@@ -98,6 +109,7 @@ posy  byte 0
 sub posizione_iniziale()
    ld posx, #165
    ld posy, #50
+   ld delta, #3    ; delta pixel di movimento sprite
 end sub 
 
 ; =====================================================================
@@ -105,11 +117,6 @@ end sub
 ; Purpose: legge il joystick in porta 2 e muove l'astronave con la
 ;          relativa accelerazione
 ; =====================================================================
-
-joy   byte 0
-delta byte 0
-const spritex = 53248+4
-const spritey = 53248+5
 
 // linee basic da 150 a 350
 sub muove_astronave()
@@ -157,4 +164,29 @@ sub muove_astronave()
    ld spritex, posx  ; update x coordinates
    ld spritey, posy  ; update y coordinates
 end sub
+
+// linee basic da 10000 a 10110
+sprite_data:
+   ;      012345670123456701234567
+   sprite ........................
+   sprite ........................
+   sprite ........................          
+   sprite ........................
+   sprite ........................
+   sprite ........................
+   sprite ........................
+   sprite ........................
+   sprite XXXXXXXXXXXXXXXXXXXXXXXX
+   sprite .X..X...X......X...X..X.
+   sprite ..X..XXX........XXX..X..
+   sprite ...X................X...
+   sprite ....X......XX......X....
+   sprite .....X....X..X....X.....
+   sprite ......X...X..X...X......
+   sprite .......X..X..X..X.......
+   sprite ........X..XX..X........
+   sprite .........X....X.........
+   sprite ..........X..X..........
+   sprite ...........XX...........
+   sprite ........................
 
