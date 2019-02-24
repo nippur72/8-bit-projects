@@ -23,7 +23,7 @@ basic start
    70 rp=0:rem contatore ripetizioni fatte di riga
    75 dim c
    78 dim ob
-   80 print"{clear}"
+   80 print"{clear}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}"
    90 v=53248 : rem start of display chip
 
    100 sys {prepara_sprite}
@@ -43,23 +43,26 @@ basic start
    420 if lc=3 then rp=rp+1:rem anche idle aumenta rp
    430 if sp<rc then sp=rc
    440 if sp>2*rc then sp=2*rc
-   450 pf$=""
-   460 for t=1 to sp
-   470 pf$=pf$+" "
-   480 next t
+
    481 ob=int(rnd(1)*3) +1
-   490 if ob<3 or sc<6 then print pf$+ln$:rem metto gli spazi prima della strada
+   490 if ob<3 or sc<6 then gosub 800:rem metto gli spazi prima della strada
    492 if ob=3 and sc>5 then gosub 900:rem metto spazi prima della strada e ostacolo
    495 if peek(53279)=4 goto 1000
    500 if rp>rc then rp=0:lc=c:rem reset condizioni iniziali scrolling
    505 sc=sc+1
-   510 goto 150
+   510 goto 150      
 
-   900 ob=int(rnd(1)*(len(ln$)-1))+1 
-   910 l$=left$(ln$,ob)
-   920 r$=right$(ln$,len(ln$)-ob-1)
-   930 print pf$+l$+"{shift q}"+r$
-   940 return
+   800 poke 1984+sp,102   
+   801 poke 1984+sp+19,102
+   802 print
+   803 return
+
+   900 ob=int(rnd(1)*(18))+1 
+   901 poke 1984+sp,102   
+   902 poke 1984+sp+19,102
+   903 poke 1984+sp+ob,81
+   904 print
+   905 return
 
    1000 print"{clear}"
    1005 poke v+21,0
