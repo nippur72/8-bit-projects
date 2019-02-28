@@ -57,7 +57,7 @@ basic start
    802 print
    803 return
 
-   900 ob=int(rnd(1)*(18))+1 
+   900 ob=int(rnd(1)*18)+1 
    901 poke 1984+sp,102   
    902 poke 1984+sp+19,102
    903 poke 1984+sp+ob,81
