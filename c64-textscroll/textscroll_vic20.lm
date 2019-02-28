@@ -1,0 +1,276 @@
+include "macros_16.lm"
+include "macros_z80.lm"
+
+VIC20 = 1
+
+// C64 = 1
+
+#ifdef VIC20
+   const VIDEO_RAM = 7680
+   const COLOR_RAM = $9600
+   const SCREEN_COLS = 22
+   const SCREEN_ROWS = 23   
+   const BASIC_RAM = 4097
+   const RASTER    = $9004
+   const ROMCHAR   = 32768
+#endif
+
+#ifdef C64
+   const VIDEO_RAM   = 1024
+   const COLOR_RAM   = $D800
+   const SCREEN_COLS = 40
+   const SCREEN_ROWS = 25   
+   const BASIC_RAM   = 2049
+   const RASTER      = $d012
+   const ROMCHAR     = 32768
+#endif
+
+   processor 6502
+   org BASIC_RAM
+
+BASIC START compact  
+   10 sys {main}   
+BASIC END
+
+const REVERSE_SPACE = 32+128
+
+const TEXT_HEIGHT = 16
+
+const SCROLL_START_ROW = [SCREEN_ROWS - TEXT_HEIGHT]/2
+
+const SCROLL_ROW0 = VIDEO_RAM + [[SCROLL_START_ROW+$0] * SCREEN_COLS]
+const SCROLL_ROW1 = VIDEO_RAM + [[SCROLL_START_ROW+$1] * SCREEN_COLS]
+const SCROLL_ROW2 = VIDEO_RAM + [[SCROLL_START_ROW+$2] * SCREEN_COLS]
+const SCROLL_ROW3 = VIDEO_RAM + [[SCROLL_START_ROW+$3] * SCREEN_COLS]
+const SCROLL_ROW4 = VIDEO_RAM + [[SCROLL_START_ROW+$4] * SCREEN_COLS]
+const SCROLL_ROW5 = VIDEO_RAM + [[SCROLL_START_ROW+$5] * SCREEN_COLS]
+const SCROLL_ROW6 = VIDEO_RAM + [[SCROLL_START_ROW+$6] * SCREEN_COLS]
+const SCROLL_ROW7 = VIDEO_RAM + [[SCROLL_START_ROW+$7] * SCREEN_COLS]
+const SCROLL_ROW8 = VIDEO_RAM + [[SCROLL_START_ROW+$8] * SCREEN_COLS]
+const SCROLL_ROW9 = VIDEO_RAM + [[SCROLL_START_ROW+$9] * SCREEN_COLS]
+const SCROLL_ROWA = VIDEO_RAM + [[SCROLL_START_ROW+$A] * SCREEN_COLS]
+const SCROLL_ROWB = VIDEO_RAM + [[SCROLL_START_ROW+$B] * SCREEN_COLS]
+const SCROLL_ROWC = VIDEO_RAM + [[SCROLL_START_ROW+$C] * SCREEN_COLS]
+const SCROLL_ROWD = VIDEO_RAM + [[SCROLL_START_ROW+$D] * SCREEN_COLS]
+const SCROLL_ROWE = VIDEO_RAM + [[SCROLL_START_ROW+$E] * SCREEN_COLS]
+const SCROLL_ROWF = VIDEO_RAM + [[SCROLL_START_ROW+$F] * SCREEN_COLS]
+
+const RIGHT_POS = SCROLL_ROW0 + SCREEN_COLS - 1 
+
+ptr = 254
+address = 252
+
+testo       byte "CIAO COME STATE, IO STO MOLTO BENE", 0
+testo_idx   byte 0
+
+bit_counter byte 0
+char        byte 0
+line        byte 0
+
+screen_counter byte 0
+
+offsets   byte 12,13,14,15,16,17,18,19
+SUB main()
+   
+   ld 36879, #8            ; set screen color to black   
+   ld testo_idx, #0        ; reset text
+   ld bit_counter, #0      ; reset counter   
+
+ripeti:   
+
+   do
+      do
+         lda RASTER
+      loop while a!=#0
+
+      do
+         lda RASTER
+      loop while a!=#5
+
+      ldx screen_counter
+      lda offsets,x
+      sta 36864
+      inc screen_counter      
+   loop while screen_counter < 8 
+
+   lda #0
+   sta screen_counter
+
+   ; scrolla schermo a sinistra
+   jsr scroll_left
+
+   ; legge carattere
+   ldx testo_idx : lda testo,x 
+   if a >= #64 then
+      sec 
+      sbc #64
+   end if
+   sta char
+   
+   ; calcola indirizzo del carattere
+   jsr calc_address_char
+
+   ; disegna carattere
+   ld line, #7
+   do
+      jsr get_bit_value
+      jsr plot_bit
+      dec line
+   loop while not negative
+
+   ; avanza di un pixel
+   inc bit_counter
+   IF bit_counter = #8 THEN   
+      ld bit_counter, #0
+
+      ; passa alla lettera successiva
+      inc testo_idx
+      ldx testo_idx : lda testo,x
+      IF zero THEN sta testo_idx
+   END IF   
+
+   jmp ripeti
+
+END SUB
+
+; ==========================================================================
+; Name: scroll_left
+; Purpose: scroll left the screen portion where the big letters are diplayed
+; Input: none
+; Returns: nothing
+; Uses: X
+; ==========================================================================
+SUB scroll_left()
+   ldx #0
+   DO
+      lda SCROLL_ROW0+1,x : sta SCROLL_ROW0,x
+      lda SCROLL_ROW1+1,x : sta SCROLL_ROW1,x
+      lda SCROLL_ROW2+1,x : sta SCROLL_ROW2,x
+      lda SCROLL_ROW3+1,x : sta SCROLL_ROW3,x
+      lda SCROLL_ROW4+1,x : sta SCROLL_ROW4,x
+      lda SCROLL_ROW5+1,x : sta SCROLL_ROW5,x
+      lda SCROLL_ROW6+1,x : sta SCROLL_ROW6,x
+      lda SCROLL_ROW7+1,x : sta SCROLL_ROW7,x
+      lda SCROLL_ROW8+1,x : sta SCROLL_ROW8,x
+      lda SCROLL_ROW9+1,x : sta SCROLL_ROW9,x
+      lda SCROLL_ROWA+1,x : sta SCROLL_ROWA,x
+      lda SCROLL_ROWB+1,x : sta SCROLL_ROWB,x
+      lda SCROLL_ROWC+1,x : sta SCROLL_ROWC,x
+      lda SCROLL_ROWD+1,x : sta SCROLL_ROWD,x
+      lda SCROLL_ROWE+1,x : sta SCROLL_ROWE,x
+      lda SCROLL_ROWF+1,x : sta SCROLL_ROWF,x
+      inx
+   LOOP WHILE x <> #SCREEN_COLS
+END SUB
+
+; ==========================================================================
+; Name: calc_address_char
+; Purpose: address = ROMCHAR + char*8
+; Input: char
+; Returns: address
+; Uses: A
+; ==========================================================================
+SUB calc_address_char() 
+   ld address, char
+   ld address+1, #0
+
+   shl16 address
+   shl16 address
+   shl16 address
+
+   add16 address, #ROMCHAR   
+END SUB
+
+maskbit byte 0
+
+; ==========================================================================
+; Name: get_bit_value
+; Purpose: calculate the pixel value pointed by: address, bit_counter, line
+;          pratically it's address[line] & (1 << bit_counter)
+; Input: bit_counter, address, line
+; Returns: pixel = 64 if bit is 1, 32 if zero
+; Uses: A, X, Y
+; ==========================================================================
+SUB get_bit_value() 
+   ldx bit_counter
+   lda mask,x
+   sta maskbit
+
+   ldy line
+   lda (address),y 
+   and maskbit 
+   IF zero THEN 
+      ld pixel, #32  
+   ELSE 
+      ld pixel, #REVERSE_SPACE
+   END IF
+END SUB
+
+mask byte 128,64,32,16,8,4,2,1
+
+pixel byte 0
+
+; ==========================================================================
+; Name: plot_bit
+; Purpose: plots the character in "pixel" at line "line" 
+;          on the rightmost column on the screen where the big letters are displayed
+; Input: pixel, line
+; Returns: nothing
+; Uses: A, X
+; Notes: the destination address is calculated using indexed table, split into lo-hi byte
+;        writing on the destination video cell is done via self modifying code
+; ==========================================================================
+SUB plot_bit()    
+   lda line
+   clc
+   adc line
+   tax
+
+   lda rightmost_lo,x : sta screen_cell
+   lda rightmost_hi,x : sta screen_cell+1
+   lda pixel
+   sta **screen_cell(7680)
+
+   inx
+   lda rightmost_lo,x : sta screen_cell1
+   lda rightmost_hi,x : sta screen_cell1+1
+   lda pixel
+   sta **screen_cell1(7680)
+
+END SUB
+
+rightmost_lo:
+   byte [RIGHT_POS + $0 * SCREEN_COLS] MOD 256
+   byte [RIGHT_POS + $1 * SCREEN_COLS] MOD 256
+   byte [RIGHT_POS + $2 * SCREEN_COLS] MOD 256
+   byte [RIGHT_POS + $3 * SCREEN_COLS] MOD 256
+   byte [RIGHT_POS + $4 * SCREEN_COLS] MOD 256
+   byte [RIGHT_POS + $5 * SCREEN_COLS] MOD 256
+   byte [RIGHT_POS + $6 * SCREEN_COLS] MOD 256
+   byte [RIGHT_POS + $7 * SCREEN_COLS] MOD 256
+   byte [RIGHT_POS + $8 * SCREEN_COLS] MOD 256
+   byte [RIGHT_POS + $9 * SCREEN_COLS] MOD 256
+   byte [RIGHT_POS + $A * SCREEN_COLS] MOD 256
+   byte [RIGHT_POS + $B * SCREEN_COLS] MOD 256
+   byte [RIGHT_POS + $C * SCREEN_COLS] MOD 256
+   byte [RIGHT_POS + $D * SCREEN_COLS] MOD 256
+   byte [RIGHT_POS + $E * SCREEN_COLS] MOD 256
+   byte [RIGHT_POS + $F * SCREEN_COLS] MOD 256
+
+rightmost_hi:
+   byte [RIGHT_POS + $0 * SCREEN_COLS] / 256
+   byte [RIGHT_POS + $1 * SCREEN_COLS] / 256
+   byte [RIGHT_POS + $2 * SCREEN_COLS] / 256
+   byte [RIGHT_POS + $3 * SCREEN_COLS] / 256
+   byte [RIGHT_POS + $4 * SCREEN_COLS] / 256
+   byte [RIGHT_POS + $5 * SCREEN_COLS] / 256
+   byte [RIGHT_POS + $6 * SCREEN_COLS] / 256
+   byte [RIGHT_POS + $7 * SCREEN_COLS] / 256
+   byte [RIGHT_POS + $8 * SCREEN_COLS] / 256
+   byte [RIGHT_POS + $9 * SCREEN_COLS] / 256
+   byte [RIGHT_POS + $A * SCREEN_COLS] / 256
+   byte [RIGHT_POS + $B * SCREEN_COLS] / 256
+   byte [RIGHT_POS + $C * SCREEN_COLS] / 256
+   byte [RIGHT_POS + $D * SCREEN_COLS] / 256
+   byte [RIGHT_POS + $E * SCREEN_COLS] / 256
+   byte [RIGHT_POS + $F * SCREEN_COLS] / 256
