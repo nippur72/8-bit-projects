@@ -17,7 +17,7 @@ Nel caso specifico, notiamo che nel nostro programma la "strada"
 viene disegnata costruendo una stringa di spazi e poi stampata con `PRINT` 
 (linea 50, 60 e 360). Quando poi vi è un'ostacolo (la "pallina" ottenuta
 con `shift` + `Q`) la stessa stringa viene modificata per includere
-lo stesso ostacolo. 
+il carattere dell'ostacolo. 
 
 Lo stesso effetto di disegno della strada lo si può ottenere
 stampando i caratteri della strada e dell'ostacolo direttamente
@@ -34,7 +34,7 @@ grazie allo scroll dei caratteri.
 - Lo schermo è fatto da 40 colonne * 25 righe
 - L'ultima riga si trova all'indirizzo: 1024+40*24 = 1984
 
-Aggiungiamo le seguenti linee BASIC:
+Aggiungiamo quindi le seguenti linee BASIC:
 
 ```
    // disegna strada sull'ultima riga e scrolla il video
@@ -117,15 +117,15 @@ possiamo eliminare le condizioni `sc<6` e `sc>5`:
    390 if ob=3 then gosub 440           // disegna strada + ostacolo
 ```
 
-Trovate il file completo di questa prima parte qui: [parte2.lm](parte2.lm).
+Trovate il file completo di questa seconda parte qui: [parte2.lm](parte2.lm).
 
 Potete compilarlo ed eseguirlo sull'emulatore VICE:
 
 ```
-> t parte1 & x64 parte1.prg
+> t parte2 & x64 parte2.prg
 ```
 
 Con la modifiche che abbiamo apportato, il gioco è diventato visibilmente più veloce.
 
-Nella prossima puntata, faremo qualche ottimizzazione al programma BASIC prima di iniziare a convertirlo in assembly.
+
 
