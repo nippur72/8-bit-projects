@@ -82,3 +82,4 @@ Potete compilarlo ed eseguirlo sull'emulatore VICE:
 
 Nella prossima puntata, faremo qualche ottimizzazione al programma BASIC prima di iniziare a convertirlo in assembly.
 
+Link alla [Parte 2](parte2.md)

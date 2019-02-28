@@ -1,0 +1,109 @@
+include "macros_16.lm"
+include "macros.lm"
+include "c64.lm"
+
+   processor 6502
+   org BASIC_RAM
+
+// === variabili usate nel basic ===
+// sc   conta linee scroll
+// ln$  riga per il disegno della strada
+// de   delta pixel di movimento sprite (per accelerazione astronave)
+// x,y  coordinate dell'astronave
+// hi   numero di collisioni prima del game over
+// sp   spazi da anteporre alla riga di strada
+// lc   cache del precedente numero random
+// rp   contatore ripetizioni fatte di riga
+
+basic start
+   10 rem f64
+   20 zz=rnd(-ti)
+   30 sc=0  
+   40 poke646,2:poke53280,2:poke53281,0
+   70 rc=7:sp=rc:lc=0:rp=0:dimc
+   80 dimob:dimhi
+   100 print"{clear}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}"
+   110 v=53248                               // start of display chip
+   120 pokev+21,4:poke53289,4:poke2042,13    // enable sprite 2
+   130 de=3
+   140 forn=0to62:readq:poke832+n,q:next     // sprite 2 data from block 13
+   150 x=165:y=50                            // posizione iniziale astronave
+   
+   // game loop da linee 160 a 430
+
+   // movimento astronave
+   160 a=peek(56320)  // legge joystick in porta 2
+   170 ifa<>127thende=de+1:goto190
+   180 ifa=127thende=de-1.5
+   190 ifde<3thende=3
+   200 ifde>10thende=10
+   210 ona-116gosub620,630,640,650,660,670,680,650,690,700
+   220 ifx<20thenx=20:goto240
+   230 ifx>255thenx=255
+   240 ify<50theny=50:goto260
+   250 ify>237theny=237
+   260 pokev+4,x:pokev+5,y   // aggiorna lo sprite
+
+   // disegno della "strada"
+   270 c=int(rnd(1)*3)+1                               // 1:aumenta spazi, 2:diminuisce spazi,3:invariato
+   280 iflc=0thenifc=1thensp=sp+1:rp=rp+1:goto300
+   290 iflc=0thenifc=2thensp=sp-1:rp=rp+1
+   300 iflc=1thensp=sp+1:rp=rp+1:goto330               // lc<>0 quindi cache c precedente in corso
+   310 iflc=2thensp=sp-1:rp=rp+1:goto330               // aumentando le volte ke ripropongo il trend
+   320 iflc=3thenrp=rp+1                               // anche idle aumenta rp
+   330 ifsp<rcthensp=rc:goto370
+   340 ifsp>2*rcthensp=2*rc
+   370 ob=int(rnd(1)*3)+1
+   380 ifob<3thengosub431:goto400         // disegna strada senza ostacolo
+   390 ifob=3thengosub440                 // disegna strada + ostacolo
+   400 ifpeek(53279)=4thengosub480        // controlla collisione sprite astronave
+   410 ifrp>rcthenrp=0:lc=c               // reset condizioni iniziali scrolling
+   420 sc=sc+1
+
+   430 goto160
+
+   // disegna strada sull'ultima riga e scrolla il video
+   431 poke 1984+sp,102   
+   432 poke 1984+sp+19,102
+   433 print                      // scrolla il video
+   434 return
+
+   // disegna strada + ostacolo
+   440 ob=int(rnd(1)*18)+1 
+   450 poke 1984+sp,102   
+   455 poke 1984+sp+19,102
+   460 poke 1984+sp+ob,81          // disegna ostacolo (pallina)
+   465 print
+   470 return
+
+   // collisione atronave
+   480 hi=hi+1
+   490 poke53289,4+hi
+   500 ifhi<11thenreturn
+
+   // fine gioco
+   510 print"{clear}"
+   520 pokev+21,0
+   530 restore
+   540 ?"fine corsa"
+   550 ?"linee superate:"+str$(sc):?"ancora?(y o n)"
+   560 gety$:ify$=""goto560
+   570 ify$="y"thengoto30
+   580 end
+
+   // grafica sprite dell'astronave
+   590 data0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+   600 data0,0,0,255,255,255,73,0,146,38,0,100,16,0,8,8,24,16
+   610 data4,36,32,2,36,64,1,36,128,0,153,0,0,66,0,0,36,0,0,24,0
+
+   // subroutines per i movimenti dell'astronave in base al joystick
+   620 y=y+de:x=x+de:return
+   630 y=y-de:x=x+de:return
+   640 x=x+de:return
+   650 return
+   660 y=y+de:x=x-de:return
+   670 y=y-de:x=x-de:return
+   680 x=x-de:return
+   690 y=y+de:return
+   700 y=y-de:return
+basic end
