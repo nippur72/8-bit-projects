@@ -48,6 +48,10 @@ il linguaggio JavaScript). Se non l'avete già fatto, scaricatelo ed installatel
 
 `t parte1`
 
+6) Opzionale: aggiungiamo al `PATH` il percorso dell'emulatore VICE in modo da poter lanciare il programma compilato direttamente dalla riga di comando, ad esempio:
+
+`x64 parte1.prg`
+
 ### Importazione del sorgente BASIC
 
 Prepariamo adesso il file BASIC da dove iniziare la conversione in assembly.
