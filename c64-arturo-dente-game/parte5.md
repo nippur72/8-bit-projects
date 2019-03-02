@@ -23,7 +23,7 @@ sprite_data:
    byte 0,0,0,255,255,255,73,0,146,38,0,100,16,0,8,8,24,16
    byte 4,36,32,2,36,64,1,36,128,0,153,0,0,66,0,0,36,0,0,24,0
 ```
-Possiamo però fare di meglio. La sintassi Asmproc ci mette a disposizione
+Possiamo però fare di meglio. La sintassi di Asmproc ci mette a disposizione
 il comando `sprite` specifico per gli sprite del C64. Con esso possiamo
 includere la grafica dello sprite direttamente nel file di testo
 usando i simboli `.` e `X`:
@@ -75,7 +75,7 @@ sub prepara_sprite()
 end sub  
 ```
 
-Possiamo adesso eliminare 590-610 e sostituire 120-140 con:
+Eliminiamo 590-610; sostituiamo 120-140 con:
 
 ```
 120 sys {prepara_sprite}
