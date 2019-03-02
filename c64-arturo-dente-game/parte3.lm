@@ -114,7 +114,7 @@ basic start
 
    // calcola un numero casuale tra 1..18 (estremi compresi)
    920 rn = (int(rnd(1)*256) and 31)+1     // estrae 1..32
-   921 if rn>18 then 900                   // scarta i numeri maggiori di 18
+   921 if rn>18 then 920                   // scarta i numeri maggiori di 18
    930 return   
 
    // inizializza il seme random
