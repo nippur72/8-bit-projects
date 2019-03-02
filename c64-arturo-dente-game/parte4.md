@@ -12,7 +12,7 @@ Abbiamo già visto come la sintassi di Asmproc `BASIC START` e `BASIC END` conse
 di inserire un normale sorgente basic V2 all'interno del codice assembly. 
 Vi è inoltre la possibilità di far riferimento ai simboli definiti nell'assembly
 direttamente dal BASIC e questo consente di richiamare facilmente le
-routine assembly con il comando `SYS`. 
+parti in assembly con il comando `SYS`. 
 
 Vediamo un esempio:
 
@@ -27,22 +27,21 @@ prova:
 ```
 
 Alla linea 10 `{prova}` verrà sostituito con l'indirizzo effettivo della routine `prova:` 
-definita dopo il blocco BASIC. SYS chiamerà quindi tale routine e ritornerà 
-poi nuovamente all'interprete BASIC. (Per inciso, la routine`prova:` non fa assolutamente nulla, 
-è solo un esempio).
+definita dopo il blocco BASIC. `SYS` chiamerà quindi tale routine e ritornerà 
+poi nuovamente all'interprete BASIC. Per inciso, la routine`prova:` non fa assolutamente nulla, 
+è solo un esempio.
 
 ### Movimento dell'astronave
 
 Il primo pezzo che è facile convertire in assembly è il movimento dell'astronave
 (linee 160-260 e 620-700). In particolare aiuta il fatto che le variabili `a`, `x`, `y` e `de`
 non vengano usate da nessun altra parte al di fuori della routine; esse sono quindi
-isolate e le possiamo convertire in blocco in assembly:
+isolate e le possiamo convertire in blocco.
 
 Rinominiamo `a` in `joy` e `x`, `y` in `posx` e `posy`, poichè i loro nomi vanno
 in conflitto con i nomi dei registri del processore 6502. Contestualmente creiamo
-le "variabili" con l'istruzione `byte` che indica che le variabli avranno appunto
-la dimensione di un byte.
-
+le "variabili" con l'istruzione `byte` che indica che tali variabli avranno appunto
+la dimensione di un byte:
 ```
 joy   byte 0
 posx  byte 0
@@ -56,7 +55,11 @@ const v = 53248
 const spritex = v+4
 const spritey = v+5
 ```
-Creiamo adesso una subroutine:
+
+La parola chiave `const` serve a creare delle costanti numeriche. In genere è sempre meglio usare
+delle costanti al posto dei valori numerici, poichè il nome stesso aiuta nella lettura del codice.
+
+Creiamo adesso una subroutine in assembly:
 
 ```
 sub muove_astronave()
