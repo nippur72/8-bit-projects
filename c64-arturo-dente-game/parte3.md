@@ -1,7 +1,7 @@
 # CONVERSIONE ASSEMBLY DI "F64" 
 
-Link alla [Parte 1](parte1.md)
-Link alla [Parte 2](parte2.md)
+- Link alla [Parte 1](parte1.md)
+- Link alla [Parte 2](parte2.md)
 
 ## PARTE 3
 
@@ -41,10 +41,11 @@ numeri casuali esclusivamente interi:
 Per facilitare il passaggio in assembly isoliamo le chiamate alla funzione `RND()`
 mettendole in delle subroutine separate, come segue:
 
-- numero random da 1 a 3: subroutine alla linea 900
-- numero random da 1 a 18: subroutine alla linea 920
+- generazione numero random da 1 a 3: subroutine alla linea 900
+- generazione numero random da 1 a 18: subroutine alla linea 920
 - inizializzazione del seme random: subroutine alla linea 940
 
+Facciamo quindi le seguenti sostituzioni:
 ```
    20 zz=rnd(-ti)
 
@@ -65,7 +66,7 @@ mettendole in delle subroutine separate, come segue:
    270 gosub 900:c=rn                                 // 1:aumenta spazi, 2:diminuisce spazi,3:invariato
    370 gosub 900:ob=rn
 
-   900 rn = (int(rnd(1)*256) and 3)+1                 // 1,2,3,4
+   900 rn = (int(rnd(1)*256) and 3)+1                 // rn = 1,2,3,4
    901 if rn=4 then 900 
    910 return
 ```
@@ -77,7 +78,7 @@ mettendole in delle subroutine separate, come segue:
 
    440 gosub 920:ob=rn
 
-   920 rn = (int(rnd(1)*256) and 31)+1               // 1..32
+   920 rn = (int(rnd(1)*256) and 31)+1               // rn = 1..32
    921 if rn>18 then 900 
    930 return   
 ```
@@ -89,7 +90,7 @@ ci faciliterà la successiva conversione e ce ne fa capire il funzionamento.
 I numeri random in assembly di sono generati come numeri interi da 1 a 2^n-1, utilizzando
 svariati algoritmi matematici (di cui non ci occuperemo).
 
-Dunque non è possibile generare direttamente un numero causale da 1..18, o da 1..3,
+Dunque non è possibile creare direttamente un numero causale da 1..18, o da 1..3,
 ma solo da 1..31 e da 1..4, salvo poi rettificare il risultato riportandolo nel range
 desiderato. Questo lo si fa con la tecnica del "roll dice and discard", cioè estraiamo 
 il numero casuale e ripetiamo l'estrazione se questo dovessere al di fuori del range
