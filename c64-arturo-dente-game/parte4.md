@@ -121,8 +121,11 @@ Note:
 del tutto l'uso delle subroutines. Il codice adesso è molto più leggibile!
 4) La subroutine non è ottimizzata al massimo, ho preferito mantenerne la leggibilità piuttosto
 che avere una routine leggermente più veloce ma illegibile (almeno in questa fase).
-5) L'assembler 6502 vuole che le costanti numeriche siano indicate con `#`. Mentre un numero
-che non inizia per `#` è interpretato come una cella di memoria. Ad esempio:
+5) L'assembly del 6502 vuole che le costanti numeriche siano indicate con `#`, mentre un numero
+che non inizia per `#` è interpretato come una cella di memoria. E' piuttosto contro-intuitivo 
+all'inizio, ma dopo un po' ci si abitua.
+
+Ad esempio:
 
 ```
    lda 53280     ; carica in A in valore della cella di memoria 53280
