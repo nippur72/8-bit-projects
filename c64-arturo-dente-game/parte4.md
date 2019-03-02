@@ -156,7 +156,7 @@ Eliminiamo adesso le linee BASIC 130, da 160 a 260, e da 620-700, sostituendo co
    160 sys {muove_astronave}
 ```
 
-Il file completo di questa terza parte si trova qui: [parte4.lm](parte4.lm).
+Il file completo di questa quarta parte si trova qui: [parte4.lm](parte4.lm).
 
 Potete compilarlo ed eseguirlo sull'emulatore VICE:
 
