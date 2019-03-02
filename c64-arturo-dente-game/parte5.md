@@ -86,7 +86,7 @@ Il file completo di questa quinta parte si trova qui: [parte5.lm](parte5.lm).
 Potete compilarlo ed eseguirlo sull'emulatore VICE:
 
 ```
-> t parte4 & x64 parte4.prg
+> t parte5 & x64 parte5.prg
 ```
 
 Non abbiamo ottenuto in incremento di velocità, ma solo un risparmio di bytes (circa 125)
