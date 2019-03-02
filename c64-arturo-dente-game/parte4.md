@@ -115,11 +115,21 @@ E dentro scriviamo la conversione delle linee da 160 a 260:
 
 Note:
 
-1) abbiamo usato la macro `ld dest, source` per scrivere in maniera compatta `LDA source`/`STA DEST`.
+1) abbiamo usato la macro `ld dest, source` per scrivere in maniera compatta `LDA source`/`STA dest`.
 2) in maniera simile, `add` e `sub` sono macro per sommare e sottrarre in maniera compatta.
 3) abbiamo sviluppato gli `IF` usando anche `ELSE` (non presente nel Basic V2) eliminando 
 del tutto l'uso delle subroutines. Il codice adesso è molto più leggibile!
-4) La subroutine non è ottimizzata al massimo, ho preferito mantenerne la leggibilità
+4) La subroutine non è ottimizzata al massimo, ho preferito mantenerne la leggibilità piuttosto
+che avere una routine leggermente più veloce ma illegibile (almeno in questa fase).
+5) L'assembler 6502 vuole che le costanti numeriche siano indicate con `#`. Mentre un numero
+che non inizia per `#` è interpretato come una cella di memoria. Ad esempio:
+
+```
+   lda 53280     ; carica in A in valore della cella di memoria 53280
+   lda #3        ; carica in A il valore 3  
+```
+
+### Posizione iniziale dell'astronave
 
 Alla linee 130 e 150 vengono inizializzate le variabili dell'astronave,
 convertiamo anche queste linee:
