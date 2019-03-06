@@ -1,0 +1,342 @@
+include "macros_16.lm"
+include "macros.lm"
+include "c64.lm"
+
+   processor 6502
+   org BASIC_RAM
+
+// === variabili usate nel basic ===
+// sc   conta linee scroll
+// ln$  riga per il disegno della strada
+// de   delta pixel di movimento sprite (per accelerazione astronave)
+// x,y  coordinate dell'astronave
+// hi   numero di collisioni prima del game over
+// sp   spazi da anteporre alla riga di strada
+// lc   cache del precedente numero random
+// rp   contatore ripetizioni fatte di riga
+
+basic start
+   10 rem f64
+   100 print"{clear}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}{down}"
+   110 v=53248                               // start of display chip
+
+   120 sys {prepara_sprite}
+   150 sys {posizione_iniziale}      
+   160 sys {main_loop}
+
+   // fine gioco
+   510 print"{clear}"
+   520 poke v+21,0
+   530 restore
+   540 print "fine corsa"
+   550 print "linee superate:"+str$(sc):print "ancora?(y o n)"
+   560 get y$:if y$="" goto560
+   570 if y$="y" then run
+   580 end
+
+basic end
+
+; =========
+; VARIABILI
+; =========
+
+joy   byte 0
+posx  byte 0
+posy  byte 0
+delta byte 0
+
+const v = 53248
+const spritex = v+4
+const spritey = v+5
+
+; =====================================================================
+; Name: posizione_iniziale
+; Purpose: imposta la posizione iniziale della navicella in posx, posy
+; =====================================================================
+
+sub posizione_iniziale()
+   ld posx, #165
+   ld posy, #50
+   ld delta, #3    ; delta pixel di movimento sprite
+end sub 
+
+; =====================================================================
+; Name: muove_astronave
+; Purpose: legge il joystick in porta 2 e muove l'astronave con la
+;          relativa accelerazione
+; =====================================================================
+
+sub muove_astronave()
+   ld joy, 56320    ; legge joystick in porta 2
+
+   ; accelerazione   
+   if a<>#127 then
+      inc delta 
+      if delta > #10 then ld delta, #10      ; non esageriamo      
+   else
+      dec delta
+      if delta <  #3 then ld delta, #3       ; non esageriamo      
+   end if   
+
+   ; rem movimenti navicella
+   if joy = #126 then sub posy, delta
+   if joy = #125 then add posy, delta
+   if joy = #123 then sub posx, delta
+   if joy = #119 then add posx, delta
+
+   if joy = #122 then 
+      sub posy, delta
+      sub posx, delta
+   end if
+   if joy = #118 then 
+      sub posy, delta
+      add posx, delta
+   end if
+   if joy = #121 then 
+      add posy, delta
+      sub posx, delta
+   end if
+   if joy = #117 then 
+      add posy, delta
+      add posx, delta
+   end if
+   
+   if posx < #20  then ld posx, #20   ; bordi
+   if posx > #255 then ld posx, #255  ; bordi
+   if posy < #50  then ld posy, #50   ; bordi
+   if posy > #237 then ld posy, #237  ; bordi
+
+   ; aggiorna lo sprite
+   ld spritex, posx      ; coordinata x
+   ld spritey, posy      ; coordinata y
+end sub
+
+
+; =====================================================================
+; Name: prepara_sprite
+; Purpose: attiva lo sprite 2 e ne carica la grafica
+; =====================================================================
+
+sub prepara_sprite()
+   ld v+21, #4        ; enable sprite 2
+   ld 53289, #4
+   ld 2042, #13       ; sprite 2 data from block 13
+
+   for x=#0 to #62
+      lda sprite_data,x
+      sta 832,x
+   next
+end sub  
+
+sprite_data:
+   ;      012345670123456701234567
+   sprite ........................
+   sprite ........................
+   sprite ........................          
+   sprite ........................
+   sprite ........................
+   sprite ........................
+   sprite ........................
+   sprite ........................
+   sprite XXXXXXXXXXXXXXXXXXXXXXXX
+   sprite .X..X...X......X...X..X.
+   sprite ..X..XXX........XXX..X..
+   sprite ...X................X...
+   sprite ....X......XX......X....
+   sprite .....X....X..X....X.....
+   sprite ......X...X..X...X......
+   sprite .......X..X..X..X.......
+   sprite ........X..XX..X........
+   sprite .........X....X.........
+   sprite ..........X..X..........
+   sprite ...........XX...........
+   sprite ........................
+
+; =====================================================================
+; Name: Random
+;
+; Purpose: genera un numero random tra 0-255
+;
+; Returns: A=numero random. Il numero si trova anche nella cella "RandomNumber"
+;
+; Nota: presa dal forum Denial e adattata per il C64:
+;       http://sleepingelephant.com/ipw-web/bulletin/bb/viewtopic.php?f=2&t=7878
+;       
+;       La sequenza random viene resa ancora più casuale facendo uno XOR
+;       con il Timer del C64 (locazione $dc04). Il seme di partenza deve
+;       essere un numero diverso da zero (qui è #$01).
+;
+;       Fa uso di codice auto-modificante (sintassi **RandomNumber($01))
+;
+; =====================================================================
+
+sub Random()
+   lda #**RandomNumber($01)
+   asl
+   if not carry then eor #$4d
+   sta RandomNumber
+   eor $dc04
+   if not zero then sta RandomNumber
+end sub
+
+sub disegna_strada()
+   jsr scroll_video
+   jsr pulisce_ultima_riga
+   jsr disegna_marciapiede
+
+   // numero casuale da 0 a 2   
+   do
+      jsr Random
+      and #3
+   loop until a<>#3
+
+   if a=#0 then 
+      jsr disegna_ostacolo
+   end if
+end sub
+
+sub disegna_marciapiede()      
+   ldx sp        ;
+   lda #102      ;
+   sta 1984,x    ; equivale a poke 1984+sp,102
+   sta 1984+19,x ; equivale a poke 1984+sp+19,102
+end sub
+
+sub pulisce_ultima_riga()   
+   lda #32
+   ldx #SCREEN_COLS-1
+   do 
+      sta VIDEO_RAM + 24*SCREEN_COLS,x
+      dex
+   loop while not negative
+end sub
+
+sub disegna_ostacolo()
+   // prende un numero causale da 0 a 17
+   do
+      jsr Random
+      and #31
+   loop while a > #17
+               
+   add sp         ;
+   tax            ; x = rnd + sp
+
+   lda #81         ; carattere pallina
+   sta 1984+1,x    ; equivale a poke 1984+sp+ob,81
+end sub
+
+sub scroll_video()
+   ldx #SCREEN_COLS-1
+ripeti:
+      lda VIDEO_RAM +  0*SCREEN_COLS + SCREEN_COLS,x : sta VIDEO_RAM + 0*SCREEN_COLS,x
+      lda VIDEO_RAM +  1*SCREEN_COLS + SCREEN_COLS,x : sta VIDEO_RAM + 1*SCREEN_COLS,x
+      lda VIDEO_RAM +  2*SCREEN_COLS + SCREEN_COLS,x : sta VIDEO_RAM + 2*SCREEN_COLS,x
+      lda VIDEO_RAM +  3*SCREEN_COLS + SCREEN_COLS,x : sta VIDEO_RAM + 3*SCREEN_COLS,x
+      lda VIDEO_RAM +  4*SCREEN_COLS + SCREEN_COLS,x : sta VIDEO_RAM + 4*SCREEN_COLS,x
+      lda VIDEO_RAM +  5*SCREEN_COLS + SCREEN_COLS,x : sta VIDEO_RAM + 5*SCREEN_COLS,x
+      lda VIDEO_RAM +  6*SCREEN_COLS + SCREEN_COLS,x : sta VIDEO_RAM + 6*SCREEN_COLS,x
+      lda VIDEO_RAM +  7*SCREEN_COLS + SCREEN_COLS,x : sta VIDEO_RAM + 7*SCREEN_COLS,x
+      lda VIDEO_RAM +  8*SCREEN_COLS + SCREEN_COLS,x : sta VIDEO_RAM + 8*SCREEN_COLS,x
+      lda VIDEO_RAM +  9*SCREEN_COLS + SCREEN_COLS,x : sta VIDEO_RAM + 9*SCREEN_COLS,x
+      lda VIDEO_RAM + 10*SCREEN_COLS + SCREEN_COLS,x : sta VIDEO_RAM +10*SCREEN_COLS,x
+      lda VIDEO_RAM + 11*SCREEN_COLS + SCREEN_COLS,x : sta VIDEO_RAM +11*SCREEN_COLS,x
+      lda VIDEO_RAM + 12*SCREEN_COLS + SCREEN_COLS,x : sta VIDEO_RAM +12*SCREEN_COLS,x
+      lda VIDEO_RAM + 13*SCREEN_COLS + SCREEN_COLS,x : sta VIDEO_RAM +13*SCREEN_COLS,x
+      lda VIDEO_RAM + 14*SCREEN_COLS + SCREEN_COLS,x : sta VIDEO_RAM +14*SCREEN_COLS,x
+      lda VIDEO_RAM + 15*SCREEN_COLS + SCREEN_COLS,x : sta VIDEO_RAM +15*SCREEN_COLS,x
+      lda VIDEO_RAM + 16*SCREEN_COLS + SCREEN_COLS,x : sta VIDEO_RAM +16*SCREEN_COLS,x
+      lda VIDEO_RAM + 17*SCREEN_COLS + SCREEN_COLS,x : sta VIDEO_RAM +17*SCREEN_COLS,x
+      lda VIDEO_RAM + 18*SCREEN_COLS + SCREEN_COLS,x : sta VIDEO_RAM +18*SCREEN_COLS,x
+      lda VIDEO_RAM + 19*SCREEN_COLS + SCREEN_COLS,x : sta VIDEO_RAM +19*SCREEN_COLS,x
+      lda VIDEO_RAM + 20*SCREEN_COLS + SCREEN_COLS,x : sta VIDEO_RAM +20*SCREEN_COLS,x
+      lda VIDEO_RAM + 21*SCREEN_COLS + SCREEN_COLS,x : sta VIDEO_RAM +21*SCREEN_COLS,x
+      lda VIDEO_RAM + 22*SCREEN_COLS + SCREEN_COLS,x : sta VIDEO_RAM +22*SCREEN_COLS,x
+      lda VIDEO_RAM + 23*SCREEN_COLS + SCREEN_COLS,x : sta VIDEO_RAM +23*SCREEN_COLS,x
+      dex
+      if negative then exit sub
+      jmp ripeti
+end sub
+
+c   byte 0
+lc  byte 0
+rc2 byte 0
+sc  byte 0
+sp  byte 0
+rc  byte 0
+rp  byte 0
+hi  byte 0
+
+sub main_loop()
+   ld sc, #0
+   ld 646,#2
+   ld 53280, #2
+   ld 53281, #0
+
+   ld rc, #7
+   ld sp, rc
+   ld lc, #0
+   ld rp, #0
+   ld c, #0
+   ld hi, #0
+
+main_loop_r:
+   jsr muove_astronave
+      
+   // numero casuale da 0 a 2   
+   //do
+      jsr Random
+      and #3
+   //loop until a<>#3
+   sta c
+
+   if lc is zero then
+      if c is zero then 
+         inc sp 
+         inc rp
+      else 
+         dec sp
+         inc rp
+      end if
+   end if
+
+   if lc = #1 then
+      inc sp
+      inc rp
+   end if
+
+   if lc = #2 then 
+      dec sp
+      inc rp
+   end if
+   
+   if lc == #3 then inc rp
+
+   if sp < rc then 
+      ld sp, rc
+   else
+      ld a, rc
+      asl
+      sta rc2
+      if sp > rc2 then ld sp, rc2
+   end if
+
+   jsr disegna_strada
+
+   if 53279=#4 then 
+      inc hi
+      lda hi
+      add #4
+      sta 53289
+      if hi < #11 then exit sub
+   end if
+   
+   if rp > rc then
+      ld rp, #0
+      ld lc, c
+   end if
+
+   inc sc
+   jmp main_loop_r
+
+end sub
+
