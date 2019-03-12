@@ -4,3 +4,4 @@ c64-textscroll/*.err
 c64-arturo-dente-game/*.asm
 c64-arturo-dente-game/*.lst
 c64-arturo-dente-game/*.err
+node_modules/
