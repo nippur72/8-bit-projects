@@ -6,3 +6,6 @@ First appeared on the [Denial Forum](http://www.sleepingelephant.com/ipw-web/bul
 
 The `.d64` disk image also contains the Minigrafik program needed for the VIC-20.
 
+![](3dplot_plus4.gif)
+
+![](3dplot_vic20.gif)
