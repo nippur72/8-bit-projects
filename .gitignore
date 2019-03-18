@@ -4,4 +4,7 @@ c64-textscroll/*.err
 c64-arturo-dente-game/*.asm
 c64-arturo-dente-game/*.lst
 c64-arturo-dente-game/*.err
+c64-random-maze/*.asm
+c64-random-maze/*.lst
+c64-random-maze/*.err
 node_modules/

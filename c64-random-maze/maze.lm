@@ -1,0 +1,58 @@
+   processor 6502
+
+   include "macros.lm"
+   include "macros_16.lm"
+   include "c64.lm"
+
+   org BASIC_RAM
+
+   basic start
+      10 sys {maze}
+      20 get a$:if a$="" then 20
+      30 goto 10
+   basic end
+
+const END_SCREEN = VIDEO_RAM + SCREEN_COLS * SCREEN_ROWS
+
+maze:
+   ld16 cella, #VIDEO_RAM                  ; parte da inizio schermo del C64
+   do
+      jsr Random                         ; prende un numero random da 0 a 255
+      ror                                ; mette il bit 0 di tale numero random nel carry
+      if carry then 
+         lda #77                         ; simbolo "/"
+      else
+         lda #78                         ; simbolo "\"
+      end if
+      sta **cella(VIDEO_RAM)             ; scrive il carattere a video
+      inc16 cella                        ; incrementa la cella di scrittura
+      cmp16 cella, #END_SCREEN           ; vede se arrivato alla fine dello schermo
+   loop while not zero
+   rts
+
+; =====================================================================
+; Name: Random
+;
+; Purpose: genera un numero random tra 0-255
+;
+; Returns: A=numero random. Il numero si trova anche nella cella "RandomNumber"
+;
+; Nota: presa dal forum Denial e adattata per il C64:
+;       http://sleepingelephant.com/ipw-web/bulletin/bb/viewtopic.php?f=2&t=7878
+;       
+;       La sequenza random viene resa ancora più casuale facendo uno XOR
+;       con il Timer del C64 (locazione $dc04). Il seme di partenza deve
+;       essere un numero diverso da zero (qui è #$01).
+;
+;       Fa uso di codice auto-modificante (sintassi **RandomNumber($01))
+;
+; =====================================================================
+
+sub Random()
+   lda #**RandomNumber($01)
+   asl
+   if not carry then eor #$4d
+   sta RandomNumber
+   eor $dc04
+   if not zero then sta RandomNumber
+end sub
