@@ -9,6 +9,7 @@ First appeared on the [Denial Forum](http://www.sleepingelephant.com/ipw-web/bul
 ## Commodore 16 / Commodore Plus 4
 
 Plain implementation in CBM BASIC 3.5
+
 ![](3dplot_plus4.gif)
 
 ## Commodore VIC 20
@@ -36,4 +37,5 @@ You can build the file with the `t.bat` batch file.
 ## VTech Laser 500
 
 Plain implementation in VTECH Basic 3.0 (Microsoft Basic)
+
 ![](3dplot_laser500.gif)
