@@ -7,4 +7,7 @@ c64-arturo-dente-game/*.err
 c64-random-maze/*.asm
 c64-random-maze/*.lst
 c64-random-maze/*.err
+3dfun/*.asm
+3dfun/*.lst
+3dfun/*.err
 node_modules/

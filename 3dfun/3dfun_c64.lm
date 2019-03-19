@@ -1,0 +1,235 @@
+   processor 6502
+
+   include "macros.lm"
+   include "macros_16.lm"
+   include "c64.lm"
+
+   org BASIC_RAM
+
+   basic start      
+      100 poke 53272,peek(53272) or 8
+      105 poke 53265,peek(53265) or 32
+      106 sys {clear_screen}      
+      110 dim m(192)
+      120 fort=0to192:m(t)=184:next
+      130 fory=35to-35step-1
+      140 foro=0to191
+      150 x=(o+y*4-96)/7
+      160 h=sqr(x*x+y*y)
+      170 ifh<>0thenz=-sin(h)/h
+      180 v=84+y*2+z*70
+      190 ifv>m(o)thenv=m(o):goto 200
+      191 m(o)=v
+      200 poke {pointX},o and 255:poke {pointX}+1,int(o/256)
+      210 poke {pointY},v
+      220 sys {plotPoint}
+      230 next
+      240 next
+      250 goto 250
+   basic end
+
+; ======================================================================
+; pixel drawing routines taken from
+; https://www.lemon64.com/forum/viewtopic.php?t=50010&sid=aefc12dc46fa4f1a51d99dc4d7687f21
+; ======================================================================
+
+;-------------------------------------------------------------------- 
+
+;This routine sets or erases a point on the hires screen based 
+;on coordinates and drawmode determined before-hand.  you can change 
+;"screen" to wherever your hires screen is located. 
+;plotPoint works by first determining which 8x8 cell the point is 
+;located in and uses tables to figure that out. 
+;The in-cell offset is determined by just isolating the lowest 3 bits 
+;of each point (0-7).  The pixel masking uses tables, too. 
+
+;-------------------------------------------------------------------- 
+
+pointX   word 100     ; 0-319 
+pointY   byte 100     ; 0-199 
+drawmode byte 1       ; 0 = erase point, 1 =set point 
+
+const screen = $2000  ; bitmap
+const dest = $fb 
+
+sub clear_screen()
+   ldy #0
+
+   ; clear bitmap area
+   ld16 dest, #8192
+   do
+      lda #0
+      sta (dest),y
+      inc16 dest
+      cmp16 dest, #16192
+   loop while not zero
+
+   ; clear screen area
+   ld16 dest, #1024
+   do
+      lda #1
+      sta (dest),y
+      inc16 dest
+      cmp16 dest, #2034
+   loop while not zero
+end sub
+
+sub plotPoint()
+   ;------------------------- 
+   ;calc Y-cell, divide by 8 
+   ;y/8 is y-cell table index 
+   ;------------------------- 
+   lda pointY 
+   lsr                         ;/ 2 
+   lsr                         ;/ 4 
+   lsr                         ;/ 8 
+   tay                         ;tbl_8,y index 
+
+   ;------------------------ 
+   ;calc X-cell, divide by 8 
+   ;divide 2-byte pointX / 8 
+   ;------------------------ 
+   ror pointX+1                ;rotate the high byte into carry flag 
+   lda pointX 
+   ror                         ;lo byte / 2 (rotate C into low byte) 
+   lsr                         ;lo byte / 4 
+   lsr                         ;lo byte / 8 
+   tax                         ;tbl_8,x index 
+
+   ;---------------------------------- 
+   ;add x & y to calc cell point is in 
+   ;---------------------------------- 
+   clc 
+
+   lda tbl_vbaseLo,y           ;table of screen row base addresses 
+   adc tbl_8Lo,x               ;+ (8 * Xcell) 
+   sta dest                    ;= cell address 
+
+   lda tbl_vbaseHi,y           ;do the high byte 
+   adc tbl_8Hi,x 
+   sta dest+1 
+
+   ;--------------------------------- 
+   ;get in-cell offset to point (0-7) 
+   ;--------------------------------- 
+   lda pointX                  ;get pointX offset from cell topleft 
+   and #%00000111              ;3 lowest bits = (0-7) 
+   tax                         ;put into index register 
+
+   lda pointY                  ;get pointY offset from cell topleft 
+   and #%00000111              ;3 lowest bits = (0-7) 
+   tay                         ;put into index register 
+
+   ;---------------------------------------------- 
+   ;depending on drawmode, routine draws or erases 
+   ;---------------------------------------------- 
+
+   ; (0 = erase, 1 = set)     
+   if drawmode is not zero then
+      ;--------- 
+      ;set point 
+      ;--------- 
+      lda (dest),y                ;get row with point in it 
+      ora tbl_orbit,x             ;isolate and set the point 
+      sta (dest),y                ;write back to screen 
+      rts
+   else
+      ;----------- 
+      ;erase point                ;handled same way as setting a point 
+      ;-----------                                   
+      lda (dest),y                ;just with opposite bit-mask 
+      and tbl_andbit,x            ;isolate and erase the point 
+      sta (dest),y                ;write back to screen 
+      rts 
+   end if
+end sub
+
+;---------------------------------------------------------------- 
+
+tbl_vbaseLo:
+   byte [screen +  0*320] MOD 256
+   byte [screen +  1*320] MOD 256
+   byte [screen +  2*320] MOD 256
+   byte [screen +  3*320] MOD 256
+   byte [screen +  4*320] MOD 256
+   byte [screen +  5*320] MOD 256
+   byte [screen +  6*320] MOD 256
+   byte [screen +  7*320] MOD 256
+   byte [screen +  8*320] MOD 256
+   byte [screen +  9*320] MOD 256
+   byte [screen + 10*320] MOD 256
+   byte [screen + 11*320] MOD 256
+   byte [screen + 12*320] MOD 256
+   byte [screen + 13*320] MOD 256
+   byte [screen + 14*320] MOD 256
+   byte [screen + 15*320] MOD 256
+   byte [screen + 16*320] MOD 256
+   byte [screen + 17*320] MOD 256
+   byte [screen + 18*320] MOD 256
+   byte [screen + 19*320] MOD 256
+   byte [screen + 20*320] MOD 256
+   byte [screen + 21*320] MOD 256
+   byte [screen + 22*320] MOD 256
+   byte [screen + 23*320] MOD 256
+   byte [screen + 24*320] MOD 256
+
+
+tbl_vbaseHi:
+   byte [screen +  0*320] / 256
+   byte [screen +  1*320] / 256
+   byte [screen +  2*320] / 256
+   byte [screen +  3*320] / 256
+   byte [screen +  4*320] / 256
+   byte [screen +  5*320] / 256
+   byte [screen +  6*320] / 256
+   byte [screen +  7*320] / 256
+   byte [screen +  8*320] / 256
+   byte [screen +  9*320] / 256
+   byte [screen + 10*320] / 256
+   byte [screen + 11*320] / 256
+   byte [screen + 12*320] / 256
+   byte [screen + 13*320] / 256
+   byte [screen + 14*320] / 256
+   byte [screen + 15*320] / 256
+   byte [screen + 16*320] / 256
+   byte [screen + 17*320] / 256
+   byte [screen + 18*320] / 256
+   byte [screen + 19*320] / 256
+   byte [screen + 20*320] / 256
+   byte [screen + 21*320] / 256
+   byte [screen + 22*320] / 256
+   byte [screen + 23*320] / 256
+   byte [screen + 24*320] / 256
+
+tbl_8Lo:
+   byte  0*8 MOD 256,  1*8 MOD 256,  2*8 MOD 256,  3*8 MOD 256,  4*8 MOD 256,  5*8 MOD 256,  6*8 MOD 256,  7*8 MOD 256,  8*8 MOD 256,  9*8 MOD 256
+   byte 10*8 MOD 256, 11*8 MOD 256, 12*8 MOD 256, 13*8 MOD 256, 14*8 MOD 256, 15*8 MOD 256, 16*8 MOD 256, 17*8 MOD 256, 18*8 MOD 256, 19*8 MOD 256
+   byte 20*8 MOD 256, 21*8 MOD 256, 22*8 MOD 256, 23*8 MOD 256, 24*8 MOD 256, 25*8 MOD 256, 26*8 MOD 256, 27*8 MOD 256, 28*8 MOD 256, 29*8 MOD 256
+   byte 30*8 MOD 256, 31*8 MOD 256, 32*8 MOD 256, 33*8 MOD 256, 34*8 MOD 256, 35*8 MOD 256, 36*8 MOD 256, 37*8 MOD 256, 38*8 MOD 256, 39*8 MOD 256
+
+tbl_8Hi:
+   byte  0*8 / 256,  1*8 / 256,  2*8 / 256,  3*8 / 256,  4*8 / 256,  5*8 / 256,  6*8 / 256,  7*8 / 256,  8*8 / 256,  9*8 / 256
+   byte 10*8 / 256, 11*8 / 256, 12*8 / 256, 13*8 / 256, 14*8 / 256, 15*8 / 256, 16*8 / 256, 17*8 / 256, 18*8 / 256, 19*8 / 256
+   byte 20*8 / 256, 21*8 / 256, 22*8 / 256, 23*8 / 256, 24*8 / 256, 25*8 / 256, 26*8 / 256, 27*8 / 256, 28*8 / 256, 29*8 / 256
+   byte 30*8 / 256, 31*8 / 256, 32*8 / 256, 33*8 / 256, 34*8 / 256, 35*8 / 256, 36*8 / 256, 37*8 / 256, 38*8 / 256, 39*8 / 256
+
+tbl_orbit:
+   byte %10000000 
+   byte %01000000 
+   byte %00100000 
+   byte %00010000 
+   byte %00001000 
+   byte %00000100 
+   byte %00000010 
+   byte %00000001 
+
+tbl_andbit:
+   byte %01111111 
+   byte %10111111 
+   byte %11011111 
+   byte %11101111 
+   byte %11110111 
+   byte %11111011 
+   byte %11111101 
+   byte %11111110 
+
