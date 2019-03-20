@@ -6,7 +6,7 @@ First appeared on the [Denial Forum](http://www.sleepingelephant.com/ipw-web/bul
 
 ## Commodore 16 / Commodore Plus 4
 
-Plain implementation in CBM BASIC 3.5
+Plain [implementation](3dfun_plus4.prg) in CBM BASIC 3.5
 
 ![](3dplot_plus4.gif)
 
@@ -16,7 +16,7 @@ Uses the MINIGRAFIK library because the VIC 20
 does not have a native bitmap mode neither the 
 commands for drawing pixels on the screen.
 
-You can find it in the `.d64` disk image.
+You can find it in the `.d64` [disk image](minigrafik.d64).
 
 ![](3dplot_vic20.gif)
 
@@ -27,7 +27,7 @@ CBM BASIC V2.0 lacks the commands for drawing the pixels.
 So I implemented such commands in machine language with 
 ASMPROC + DASM. 
 
-You can build the file with the `t.bat` batch file. 
+You can build [the file](3dfun_c64.prg) with the `t.bat` batch file. 
 
 There is also a (~3x) [faster version](3dfun_c64_mospeed.prg) compiled with [Mospeed](https://github.com/EgonOlsen71/basicv2)
 
@@ -35,6 +35,6 @@ There is also a (~3x) [faster version](3dfun_c64_mospeed.prg) compiled with [Mos
 
 ## VTech Laser 500
 
-Plain implementation in VTECH Basic 3.0 (Microsoft Basic)
+Plain [implementation](3dfun_laser500.bas) in VTECH Basic 3.0 (Microsoft Basic)
 
 ![](3dplot_laser500.gif)
