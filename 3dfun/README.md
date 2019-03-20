@@ -4,8 +4,6 @@
 
 First appeared on the [Denial Forum](http://www.sleepingelephant.com/ipw-web/bulletin/bb/viewtopic.php?t=952&start=54) back in 2008.
 
-
-
 ## Commodore 16 / Commodore Plus 4
 
 Plain implementation in CBM BASIC 3.5
@@ -31,8 +29,9 @@ ASMPROC + DASM.
 
 You can build the file with the `t.bat` batch file. 
 
-![](3dplot_c64.png)
+There is also a (~3x) [faster version](3dfun_c64_mospeed.prg) compiled with [Mospeed](https://github.com/EgonOlsen71/basicv2)
 
+![](3dplot_c64.png)
 
 ## VTech Laser 500
 
