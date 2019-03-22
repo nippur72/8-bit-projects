@@ -5,21 +5,26 @@
    include "macros_16.lm"
    include "c64.lm"
 
+   org BASIC_RAM
+
    ; MOSPEED not defined  => normal basic V2
    ; MOSPEED defined      => basic part compiled with Mospeed
    
-   #ifdef MOSPEED then org BASIC_RAM-2
+   #ifdef MOSPEED  
+      basic start
+         10 sys {mospeed_part}
+      basic end
+mospeed_part:
+   #endif
+
    #ifdef MOSPEED then include binary "compiled.bin"
 
-   ; to produce "compiled.bin" with Mospeed the following steps are needed   
-   ; 1) take the generated basic from "3dfun_c64.prg" and write it to a text file (use VICE)
-   ; 2) compile it with Mospeed
-   ; 3) rename it as "compiled.bin"
-   ; 5) patch to $00 $00 the first two bytes of the file with an hex editor
-   ; 6) recompile this (t.bat)
+   ; to align the basic source below with "basic_part.bas" (compiled by mospeed) do the following steps:
+   ; 1) run the compile script (t.bat)
+   ; 2) open "3dfun_c64.prg" with VICE and save the basic text to a text file named "basic_part.bas"
+   ; 3) run the compile script (t.bat) again
 
-#ifndef MOSPEED
-   org BASIC_RAM
+#ifndef MOSPEED   
    basic start      
       100 poke 53272,peek(53272) or 8
       105 poke 53265,peek(53265) or 32

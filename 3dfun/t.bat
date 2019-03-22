@@ -12,7 +12,8 @@ if %errorlevel% == -1 goto fine
 dasm %SOURCE%.asm -f1 -l%SOURCE%.lst -o%SOURCE%.prg
 if %errorlevel% == -1 goto fine
 
-rem basic V2 compiled with Mospeed
+rem basic V2 part compiled with Mospeed
+call mospeed basic_part.bas -target=compiled.bin -addressheader=false -progstart=2062
 
 %ASMPROC% -i %SOURCE%.lm -o %SOURCE%_mospeed.asm -t dasm -d MOSPEED
 if %errorlevel% == -1 goto fine
