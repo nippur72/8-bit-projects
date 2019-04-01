@@ -1,0 +1,34 @@
+   processor 6502
+
+   include <macros.lm>
+   include <macros_16.lm>
+
+   include <c64.lm>
+
+   org BASIC_RAM
+
+   basic start
+      10 sys {tapemon}
+   basic end
+
+sub tapemon()
+   sei
+
+   do
+      do
+         lda $dc0d  
+         and #$10
+      loop while zero
+
+      lda 53280 
+      eor #$ff
+      sta 53280
+      sta 53281
+
+      do
+         lda $dc0d  
+         and #$10
+      loop while not zero      
+   loop while zero
+
+end sub

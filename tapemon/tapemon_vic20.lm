@@ -1,0 +1,92 @@
+   processor 6502
+
+   include <macros.lm>
+   include <macros_16.lm>
+
+   include <vic20.lm>
+   
+   org BASIC_RAM
+
+   basic start
+      10 sys {tapemon}
+   basic end
+
+dim tape_old_irq as word
+
+const IRQ = $314
+const VIA2_COUNTER = $9124
+const VIA2_ACR     = $912b
+const VIA2_PCR     = $912e
+
+const TIMER_VALUE = $ffff
+
+const COLOR1 = 3*16+3+8
+const COLOR2 = 1*16+1+8
+
+sub tapemon()
+
+   ; not sure: disable all interrupts
+   sei
+   lda #$7f
+   sta $911e  ; VIA 1 Interrupt Enable Register
+   sta $912e  ; VIA 2 Interrupt Enable Register
+   sta $912d  ; VIA 1 Interrupt Flag Register
+
+   ; Start tape motor
+   lda $911c
+   and #$fd
+   sta $911c
+
+   ; Set IRQ vector
+   ld16 tape_old_irq, IRQ
+   ld16 IRQ, #bit_received
+
+   ; Initialise VIA2 Timer 1 (cassette tape read)
+   ld16 VIA2_COUNTER, TIMER_VALUE   ; Restart timer
+   ld VIA2_ACR, #%00000000          ; One-shot mode
+   ld VIA2_PCR, #%10000010          ; CA1 IRQ enable (tape pulse)
+
+   ; Let the IRQ handler do everything
+   cli
+   clc   
+   do : loop while not carry
+
+; this routine gets triggered when the edge of the tape bit 
+; is detected or when the timer counter underflows
+
+bit_received:
+   
+   ; an actual bit decoding routine should look at underflow bit
+   ; lda $912d       ; Get timer underflow bit.
+   ; asl             ; Move underflow bit into carry.
+   ; asl             ;
+   ; it should also look into the counter value?
+
+   ; color effect   
+   lda $900f
+   if a=#COLOR1 then 
+      ld a, #COLOR2
+   else
+      ld a, #COLOR1
+   end if
+   sta $900f
+       
+   ; sound effect
+   lda 36878
+   if a=#15 then 
+      ld a, #0
+   else
+      ld a, #15
+   end if
+   sta 36878
+
+   ld16 VIA2_COUNTER, TIMER_VALUE        ; Restart timer.
+
+   ; not sure: prepare for re-trigger?
+   lda #$7f
+   sta $912d
+
+   ; complete the interrupt routine
+   jmp $eb18
+
+end sub
