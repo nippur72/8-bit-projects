@@ -23,7 +23,7 @@ const TIMER_VALUE = $ffff
 const COLOR1 = 3*16+3+8
 const COLOR2 = 1*16+1+8
 
-sub tapemon()
+sub irq_tapemon()
 
    ; not sure: disable all interrupts
    sei
@@ -90,3 +90,51 @@ bit_received:
    jmp $eb18
 
 end sub
+
+sub tapemon()
+   ; Start tape motor
+   lda $911c
+   and #$fd
+   sta $911c
+
+   sei
+   lda #$27
+   sta $9128
+   ldx #$01
+
+loop:
+   lda #$02
+   do
+      bit     $912D
+   loop while zero
+
+   ; ???
+   lda $912D
+   stx $9129
+   bit $9121   
+   asl     
+   asl     
+   asl     
+
+   ; color effect   
+   lda $900f
+   if a=#COLOR1 then 
+      ld a, #COLOR2
+   else
+      ld a, #COLOR1
+   end if
+   sta $900f
+
+   ; sound effect
+   lda 36878
+   if a=#15 then 
+      ld a, #0
+   else
+      ld a, #15
+   end if
+   sta 36878
+   
+   jmp loop
+
+end sub
+
