@@ -1,3 +1,6 @@
+vic20-viznut-pwp-soundtest/*.asm
+vic20-viznut-pwp-soundtest/*.lst
+vic20-viznut-pwp-soundtest/*.err
 tapemon/*.asm
 tapemon/*.lst
 tapemon/*.err

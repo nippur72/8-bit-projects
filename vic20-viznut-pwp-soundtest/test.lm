@@ -1,0 +1,41 @@
+   processor 6502
+
+   include <macros.lm>
+   include <macros_16.lm>
+   include <vic20.lm>
+
+   org BASIC_RAM
+
+   basic start
+      5 print "{clr}viznut/pwp waveform{down}"      
+      6 print "sound test{down}"
+      7 print "hit space to change{down}{down}"
+      8 gosub 1000
+      10 poke 36878,15
+      20 poke 36876, 152:print "normal waveform{down}"
+      30 gosub 1000
+      40 poke 36876,126:for i=1 to 10:next
+      60 sys {wav}:print "modified waveform{down}"
+      70 gosub 1000
+      80 poke 36876, 126:for i=1 to 10:next
+      90 goto 20            
+      1000 get a$:if a$<>" " then 1000
+      1010 return
+   basic end
+
+wav:
+   ldx #$7e   ; oscillator off, maximum shift rate (4 clocks)  
+	ldy #$fe   ; oscillator on, maximum shift rate (4 clocks)
+	lda #152   ; the initial frequency of the sound (can be any)
+
+   ; "101100" 0010110011010011
+	sei        ; the following stuff needs exact timing
+	sty $900c  ; push 1 to oscillator
+   stx $900c  ; push 0 to oscillator
+	sty $900c  ; push 1 to oscillator
+   sty $900c  ; push 1 to oscillator
+   stx $900c  ; push 0 to oscillator
+   stx $900c  ; push 0 to oscillator	
+	sta $900c  ; and let it rotate on its own
+	cli
+   rts
