@@ -17,3 +17,6 @@ c64-random-maze/*.err
 3dfun/*.lst
 3dfun/*.err
 node_modules/
+c64-multiplexer/*.asm
+c64-multiplexer/*.lst
+c64-multiplexer/*.err
