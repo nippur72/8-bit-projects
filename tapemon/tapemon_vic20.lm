@@ -8,7 +8,7 @@
    org BASIC_RAM
 
    basic start
-      10 sys {tapemon}
+      10 sys {irq_tapemon}
    basic end
 
 dim tape_old_irq as word
@@ -91,7 +91,7 @@ bit_received:
 
 end sub
 
-sub tapemon()
+sub anirog_tapemon()
    ; Start tape motor
    lda $911c
    and #$fd

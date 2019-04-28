@@ -8,10 +8,100 @@
    org BASIC_RAM
 
    basic start
-      10 sys {tapemon}
+      10 print "1) irq tape monitor"
+      20 print "2) non irq tape monitor"
+      30 input a
+      40 if a=1 then sys {tapemon_irq}
+      50 if a=2 then sys {tapemon_noirq}
    basic end
 
-sub tapemon()
+sub flip_screen()
+   ; flip screen
+   lda 53280 
+   and #15
+   if a=#6 then 
+      lda #3
+   else
+      lda #6
+   end if
+   sta 53280
+   sta 53281
+end sub
+
+; irq version
+sub tapemon_irq()
+      
+	LDA $01		; Disable KERNAL and BASIC ROM and enable cass. motor
+	AND #$DD
+	STA $01
+
+   ; taken from http://codebase64.org/doku.php?id=base:irq-tape_loader
+   SEI
+   STA $01
+   LDA #$00	   ; Disable VIC-II interupts
+   STA $D01A
+
+   LDA $D019	; Acknowledge VIC-II interupts
+   STA $D019
+
+   LDA #$7F	   ; Disable CIAs interupts
+   STA $DC0D
+   STA $DD0D
+
+   LDA #$90	   ; Enable FLAG (cass. input) interrupt
+   STA $DC0D
+
+   LDA #$FF	   ; Set timer value to 576 cycles
+   LDX #$C0
+   STA $DC06
+   STX $DC07
+
+   LDA $DC0D	; Acknowledge CIAs interrupts
+   LDA $DD0D
+
+   ld16 $FFFA, #NMI     ; Initialise NMI vector
+   ld16 $FFFE, #IRQ     ; Initialise IRQ vector
+
+   CLI
+
+loop_forever:   
+   jmp loop_forever
+
+IRQ:
+   PHA
+   TXA
+   PHA
+   TYA
+   PHA
+   LDA $DC0D	; See if counter has finished counting (no = bit 0,
+   LDX #$19	   ; yes = bit 1). Start counter again
+   STX $DC0F
+   LSR  		   ; Get counter finished flag in CARRY
+   LSR 
+   ROL $BD		; Put the bit in buffer
+   LDA $BD
+
+   jsr flip_screen
+
+IRQ_END:
+   LDA $DC0D	; Acknowledge interrupt
+   PLA
+   TAY
+   PLA
+   TAX
+   PLA
+NMI:
+   RTI   
+end sub
+
+
+; non irq version
+sub tapemon_noirq()
+
+   lda $01
+   and #$ff-$20    ;motor on
+   sta $01
+
    sei
 
    do
@@ -20,10 +110,7 @@ sub tapemon()
          and #$10
       loop while zero
 
-      lda 53280 
-      eor #$ff
-      sta 53280
-      sta 53281
+      jsr flip_screen
 
       do
          lda $dc0d  
