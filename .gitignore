@@ -1,3 +1,6 @@
+vic20-raster-boxes/*.asm
+vic20-raster-boxes/*.lst
+vic20-raster-boxes/*.err
 vic20-viznut-pwp-soundtest/*.asm
 vic20-viznut-pwp-soundtest/*.lst
 vic20-viznut-pwp-soundtest/*.err
