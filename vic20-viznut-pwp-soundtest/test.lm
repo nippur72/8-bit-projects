@@ -7,35 +7,192 @@
    org BASIC_RAM
 
    basic start
-      5 print "{clr}viznut/pwp waveform{down}"      
-      6 print "sound test{down}"
-      7 print "hit space to change{down}{down}"
-      8 gosub 1000
-      10 poke 36878,15
-      20 poke 36876, 152:print "normal waveform{down}"
-      30 gosub 1000
-      40 poke 36876,126:for i=1 to 10:next
-      60 sys {wav}:print "modified waveform{down}"
-      70 gosub 1000
-      80 poke 36876, 126:for i=1 to 10:next
-      90 goto 20            
-      1000 get a$:if a$<>" " then 1000
-      1010 return
+      100 print "{clr}viznut/pwp waveform{down}"      
+      110 print "sound test{down}"
+      125 input "freq";n:poke {tone},n
+      127 input "(s)ound or (n)oise";p$
+      120 print "{down}{rvs on}0{rvs off}-{rvs on}F{rvs off} selects wav{down}"      
+      121 print "{rvs on}space{rvs off} stops{down}"
+      130 get a$:if a$="" then 130
+      140 if a$=" " then poke 36878, 0
+      150 w=asc(a$)
+      160 if w>=48 and w<=57 then w=w-48
+      170 if w>=65 and w<=70 then w=w-55
+      180 if w<0 or w>15 then goto 130
+      185 poke 36878, 15
+      190 poke {wave}, w
+      200 poke 36874,126
+      201 poke 36875,126
+      202 poke 36876,126
+      203 poke 36877,126
+      209 for i=1 to 10:next
+      210 if p$="s" then sys {wav_sound}
+      211 if p$="n" then sys {wav_noise}
+      220 print "viznut wave ";a$;" {return}{up}";
+      230 goto 130      
    basic end
 
-wav:
+const TONE = 254
+const wave = 253
+
+macro B1
+   sty $900c  ; push 1 to oscillator
+end macro
+
+macro B0
+   stx $900c  ; push 0 to oscillator
+end macro
+
+macro BE
+   sta $900c  ; and let it rotate on its own
+end macro
+
+macro N1
+   sty $900d  ; push 1 to oscillator
+end macro
+
+macro N0
+   stx $900d  ; push 0 to oscillator
+end macro
+
+macro NE
+   sta $900d  ; and let it rotate on its own
+end macro
+
+wav_sound:
    ldx #$7e   ; oscillator off, maximum shift rate (4 clocks)  
 	ldy #$fe   ; oscillator on, maximum shift rate (4 clocks)
-	lda #152   ; the initial frequency of the sound (can be any)
-
-   ; "101100" 0010110011010011
-	sei        ; the following stuff needs exact timing
-	sty $900c  ; push 1 to oscillator
-   stx $900c  ; push 0 to oscillator
-	sty $900c  ; push 1 to oscillator
-   sty $900c  ; push 1 to oscillator
-   stx $900c  ; push 0 to oscillator
-   stx $900c  ; push 0 to oscillator	
-	sta $900c  ; and let it rotate on its own
-	cli
+	lda TONE   ; the initial frequency of the sound (can be any)
+   if wave = #$0 then : lda TONE : sei : BE : cli                               : end if  ; "0"
+   if wave = #$1 then : lda TONE : sei : B1 : B0 : BE : cli                     : end if  ; "10"
+   if wave = #$2 then : lda TONE : sei : B1 : B0 : B0 : BE : cli                : end if  ; "100"
+   if wave = #$3 then : lda TONE : sei : B1 : B1 : B0 : BE : cli                : end if  ; "110"
+   if wave = #$4 then : lda TONE : sei : B1 : B0 : B0 : B0 : BE : cli           : end if  ; "1000"
+   if wave = #$5 then : lda TONE : sei : B1 : B0 : B1 : B0 : BE : cli           : end if  ; "1010"
+   if wave = #$6 then : lda TONE : sei : B1 : B0 : B1 : B1 : BE : cli           : end if  ; "1011"
+   if wave = #$7 then : lda TONE : sei : B1 : B1 : B1 : B0 : BE : cli           : end if  ; "1110"
+   if wave = #$8 then : lda TONE : sei : B1 : B0 : B0 : B1 : B0 : BE : cli      : end if  ; "10010"
+   if wave = #$9 then : lda TONE : sei : B1 : B0 : B1 : B0 : B0 : BE : cli      : end if  ; "10100"
+   if wave = #$a then : lda TONE : sei : B1 : B0 : B1 : B1 : B0 : BE : cli      : end if  ; "10110"
+   if wave = #$b then : lda TONE : sei : B1 : B1 : B0 : B0 : B0 : BE : cli      : end if  ; "11000"
+   if wave = #$c then : lda TONE : sei : B1 : B1 : B0 : B1 : B0 : BE : cli      : end if  ; "11010"
+   if wave = #$d then : lda TONE : sei : B1 : B0 : B0 : B1 : B0 : B0 : BE : cli : end if  ; "100100"
+   if wave = #$e then : lda TONE : sei : B1 : B0 : B1 : B0 : B1 : B0 : BE : cli : end if  ; "101010"
+   if wave = #$f then : lda TONE : sei : B1 : B0 : B1 : B1 : B0 : B0 : BE : cli : end if  ; "101100"   
    rts
+
+wav_noise:
+   ldx #$7e   ; oscillator off, maximum shift rate (4 clocks)  
+	ldy #$fe   ; oscillator on, maximum shift rate (4 clocks)
+	lda TONE   ; the initial frequency of the sound (can BE any)
+   if wave = #$0 then : lda TONE : sei : NE : cli                               : end if  ; "0"
+   if wave = #$1 then : lda TONE : sei : N1 : N0 : NE : cli                     : end if  ; "10"
+   if wave = #$2 then : lda TONE : sei : N1 : N0 : N0 : NE : cli                : end if  ; "100"
+   if wave = #$3 then : lda TONE : sei : N1 : N1 : N0 : NE : cli                : end if  ; "110"
+   if wave = #$4 then : lda TONE : sei : N1 : N0 : N0 : N0 : NE : cli           : end if  ; "1000"
+   if wave = #$5 then : lda TONE : sei : N1 : N0 : N1 : N0 : NE : cli           : end if  ; "1010"
+   if wave = #$6 then : lda TONE : sei : N1 : N0 : N1 : N1 : NE : cli           : end if  ; "1011"
+   if wave = #$7 then : lda TONE : sei : N1 : N1 : N1 : N0 : NE : cli           : end if  ; "1110"
+   if wave = #$8 then : lda TONE : sei : N1 : N0 : N0 : N1 : N0 : NE : cli      : end if  ; "10010"
+   if wave = #$9 then : lda TONE : sei : N1 : N0 : N1 : N0 : N0 : NE : cli      : end if  ; "10100"
+   if wave = #$a then : lda TONE : sei : N1 : N0 : N1 : N1 : N0 : NE : cli      : end if  ; "10110"
+   if wave = #$b then : lda TONE : sei : N1 : N1 : N0 : N0 : N0 : NE : cli      : end if  ; "11000"
+   if wave = #$c then : lda TONE : sei : N1 : N1 : N0 : N1 : N0 : NE : cli      : end if  ; "11010"
+   if wave = #$d then : lda TONE : sei : N1 : N0 : N0 : N1 : N0 : N0 : NE : cli : end if  ; "100100"
+   if wave = #$e then : lda TONE : sei : N1 : N0 : N1 : N0 : N1 : N0 : NE : cli : end if  ; "101010"
+   if wave = #$f then : lda TONE : sei : N1 : N0 : N1 : N1 : N0 : N0 : NE : cli : end if  ; "101100"   
+   rts
+
+/*
+ 0 "0"      0000000011111111 
+ 1 "10"     0000001011111101
+ 2 "100"    0000010011111011
+ 3 "110"    0000011011111001
+ 4 "1000"   0000100011110111
+ 5 "1010"   0000101011110101
+ 6 "1011"   0000110011110011
+ 7 "1110"   0000111011110001
+ 8 "10010"  0001001011101101
+ 9 "10100"  0001010011101011
+ a "10110"  0001011011101001
+ b "11000"  0001100011100111
+ c "11010"  0001101011100101
+ d "100100" 0010010011011011
+ e "101010" 0010101011010101
+ f "101100" 0010110011010011
+*/
+
+
+/* VIZNUT generic routine */
+
+/*
+macro aso mem
+   .byte $07
+   .byte {1}
+end macro
+
+;macro axs mem
+;   .byte $8F
+;   .word mem
+;end macro
+
+const TMP = 254
+const TMP2 = 253
+
+dim channel as byte
+dim freq    as byte
+dim reg     as byte
+
+setwave:
+   ldy channel
+   ldx freq
+   lda reg
+
+	; USAGE: y = channel ($0a..$0c)
+	;        x = initial frequency
+	;        a = shift register contents
+	;
+	; WARNING for purists: self-modifying code, illegal opcodes.
+	;
+	; code align assertion: make sure that the loop is within a page.
+	; oscillator assertion: make sure that the channel has been at $7e
+	; for some time before calling this function.
+	; put TMP and TMP2 in the zero page.
+
+	stx initfreq	        ; 4
+   
+	sty ch0	              ; 4
+	sty ch1	              ; 4
+	ldx ldfqmasks-$a,y     ; 4
+	sta TMP		           ; 3
+   
+	ora #$7f	              ; 2
+   
+	;axs **ch0($900c)       ; 4  [$900c] = a AND x
+   .byte $8F
+ch0:
+   .word $900c
+	sty TMP2	              ; 3
+	ldy #7		           ; 2
+
+   do
+      lda #$7f	           ; 2
+      aso TMP		        ; 5  asl tmp; a = [tmp] OR $7f      
+      ;axs **ch1($900c)	  ; 4  [$900c] = a AND x	
+      .byte $8F
+ch1:
+      .word $900c
+      dey		           ; 2
+   loop while not zero    ; 3
+
+	lda #**initfreq(128)   ; 2	
+	nop		              ; 2
+	ldy TMP2	              ; 3	  
+   sta $9000,y	           ; 5
+	rts		              ; 6	total clocks 11+4+3+2+16*7+16+6 eq 154
+
+ldfqmasks:
+   .byte $fe  ; $900a - 1 x 16 clocks/bit
+   .byte $fd  ; $900b - 2 x  8 clocks/bit
+   .byte $fb  ; $900c - 4 x  4 clocks/bit
+*/
