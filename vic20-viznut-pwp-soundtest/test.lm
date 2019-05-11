@@ -13,23 +13,33 @@
       127 input "(s)ound or (n)oise";p$
       120 print "{down}{rvs on}0{rvs off}-{rvs on}F{rvs off} selects wav{down}"      
       121 print "{rvs on}space{rvs off} stops{down}"
+      122 print "{rvs on}x{rvs off} loops all{down}"
       130 get a$:if a$="" then 130
       140 if a$=" " then poke 36878, 0
+      145 if a$="x" then gosub 2000:goto 130
       150 w=asc(a$)
       160 if w>=48 and w<=57 then w=w-48
       170 if w>=65 and w<=70 then w=w-55
       180 if w<0 or w>15 then goto 130
-      185 poke 36878, 15
-      190 poke {wave}, w
-      200 poke 36874,126
-      201 poke 36875,126
-      202 poke 36876,126
-      203 poke 36877,126
-      209 for i=1 to 10:next
-      210 if p$="s" then sys {wav_sound}
-      211 if p$="n" then sys {wav_noise}
-      220 print "viznut wave ";a$;" {return}{up}";
-      230 goto 130      
+      190 gosub 1000
+      200 goto 130      
+      1000 poke 36878, 15
+      1010 poke {wave}, w
+      1020 poke 36874,126
+      1030 poke 36875,126
+      1040 poke 36876,126
+      1050 poke 36877,126
+      1060 for i=1 to 10:next
+      1070 if p$="s" then sys {wav_sound}
+      1080 if p$="n" then sys {wav_noise}
+      1090 print "viznut wave";w;"{left}    {return}{up}";
+      1100 return
+      2000 for w=0 to 15
+      2010 gosub 1000
+      2015 print
+      2020 for t=1 to 300:next
+      2030 next
+      2040 return
    basic end
 
 const TONE = 254
