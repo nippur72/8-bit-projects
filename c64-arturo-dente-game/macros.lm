@@ -11,8 +11,12 @@ MACRO call mem
    jsr {1}
 END MACRO
 
-macro shl
-   asl {0}
+macro shl "a"
+   asl {1}
+end macro
+
+macro shl mem
+   asl {1}
 end macro
 
 macro shr

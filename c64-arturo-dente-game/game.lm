@@ -192,3 +192,14 @@ sprite_data:
    sprite ...........XX...........
    sprite ........................
 
+/*
+http://forum.6502.org/viewtopic.php?f=2&t=5247&start=15
+  lda seedhi
+  lsr
+  rol seedlo
+  bcc noeor
+  eor #$B4
+noeor
+  sta seedhi
+  eor seedlo
+*/
