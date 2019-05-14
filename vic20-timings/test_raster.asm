@@ -1,0 +1,102 @@
+   PROCESSOR 6502
+
+VIC20 = 1 
+
+
+
+GETIN   = $FFE4     
+CLRSCN  = $E55F     
+PRNSTR  = $CB1E     
+GOHOME  = $E581     
+PRNINT  = $DDCD     
+SCNKEY  = $FF9F     
+
+
+
+CURSOR_PTR  = 209
+JIFFY_CLOCK = 162
+CRSRCOL     = 646
+
+
+
+COLOR_BLACK   = 0
+COLOR_WHITE   = 1
+COLOR_RED     = 2
+COLOR_CYAN    = 3
+COLOR_MAGENTA = 4
+COLOR_GREEN   = 5
+COLOR_BLUE    = 6
+COLOR_YELLOW  = 7
+
+
+
+SCREEN_COLS = 22
+SCREEN_ROWS = 23
+VIDEO_RAM = 7680
+COLOR_RAM =  38400
+COLOR_PAGE_OFFSET =  ((COLOR_RAM - VIDEO_RAM) / 256)
+BASIC_RAM = 4097
+RASTER =  $9004
+ROMCHAR =  32768
+
+
+    
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+       
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   ORG BASIC_RAM
+
+
+BASIC_ROW_0: BYTE [BASIC_ROW_1%256],[BASIC_ROW_1/256],[40%256],[40/256],158,32,[[[MAIN%10000]-[MAIN%1000]]/1000+$30],[[[MAIN%1000]-[MAIN%100]]/100+$30],[[[MAIN%100]-[MAIN%10]]/10+$30],[[[MAIN%10]-[MAIN%1]]/1+$30],0
+BASIC_ROW_1 BYTE 0,0
+
+MAIN:
+   SEI
+   CLC
+
+DO_95_START:
+      LDA RASTER
+      STA 36879
+	BCC DO_95_START
+DO_95_END:
+
+   

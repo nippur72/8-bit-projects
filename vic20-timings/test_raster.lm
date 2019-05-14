@@ -1,0 +1,19 @@
+   processor 6502
+
+   include "vic20.lm"
+
+   org BASIC_RAM
+
+   basic start
+      40 sys {main}
+   basic end
+
+main:
+   sei
+   clc
+
+   do
+      lda RASTER
+      sta 36879
+   loop while not carry
+   
