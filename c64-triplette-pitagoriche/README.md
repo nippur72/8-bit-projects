@@ -1,10 +1,13 @@
 TRIPLETTE PITAGORICHE
 =====================
 
-La mia entry per la sfida delle triplette pitagoriche proposta a Emanuele Bonin:  
+La mia entry per la sfida delle triplette pitagoriche proposta da Emanuele Bonin:  
    - https://sys64738.org/wp-content/uploads/2019/06/00_TriplettePitagoriche.pdf
    - https://www.facebook.com/groups/programming.c64/permalink/334295593917369/
 
+Per Commodore 64:
+   - sorgente [triplette.c](triplette.c)
+   - eseguibile [triplette.prg](triplette.prg)
 
 NOTE SULL'IMPLEMENTAZIONE
 =========================
