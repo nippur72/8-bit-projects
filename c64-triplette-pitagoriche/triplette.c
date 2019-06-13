@@ -169,10 +169,10 @@ void main() {
          c = tp[2]; // legge i numeri dalla tripletta per velocizzare il calcolo         
          tp += 3;
 
-         a2 = a*2; // precalcola elementi per velocizzare
-         b2 = b*2; // precalcola elementi per velocizzare
-         c2 = c*2; // precalcola elementi per velocizzare
-         c3 = c*3; // precalcola elementi per velocizzare
+         a2 = a+a;  // precalcola elementi per velocizzare
+         b2 = b+b;  // precalcola elementi per velocizzare
+         c2 = c+c;  // precalcola elementi per velocizzare
+         c3 = c2+c; // precalcola elementi per velocizzare
 
          mmul1(); ++n; if(n>=981 && n<=1000) salva();
          mmul2(); ++n; if(n>=981 && n<=1000) salva();
