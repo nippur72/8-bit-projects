@@ -1,3 +1,3 @@
-cl65 -O triplette.c -o triplette.prg
+cl65 -O -Oi triplette.c -o triplette.prg
 del triplette.o
 
