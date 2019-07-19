@@ -2,7 +2,7 @@
 
 Il Laser 500 dispone di un ottimo interprete BASIC; è siglato
 "Video Technology BASIC 1.0" ma in realtà non è altro che 
-un BASIC MicroSOFT di ultima generazione, adattato per la macchina e
+un MicroSOFT BASIC di ultima generazione, adattato per la macchina e
 concesso in licenza alla Video Technology. Addirittura
 in fondo al manuale si trova un form di "non-disclosure agreement"
 con cui l'utente si impegna a custodire e non fare utilizzare 
@@ -13,15 +13,15 @@ le copie dello stesso (!).
 Di recente si è reso possibile approfondire i dettagli di questa
 specifica implementazione dell'interprete BASIC, grazie al 
 manuale della macchina di cui ne esistono solo poche rare copie, 
-ma che è stato gentilmente scannerizzato e condiviso dal retroamatore
-Carletto, a cui va la nostra eterna gratitudine. 
+ma che è stato gentilmente scansionato e condiviso dal retroamatore
+Carletto Provetto, a cui va la nostra eterna gratitudine. 
 
 Sfogliando il manuale, a pagina 160 si trovano alcuni consigli 
 su come rendere più efficienti i programmi BASIC.
 
 Fra questi ve n'è uno che mi ha insospettito:
 
-[](manual_page_160_snip.png)
+[manual_page_160_snip.png]()
 
 Secondo quanto consigliato, rendere l'argomento di una funzione 
 più semplice ne aumenterebbe la velocità di esecuzione. Ossia
