@@ -121,7 +121,7 @@ in vari modi, ad esempio dal `MON`itor con il comando:
 D000G
 ```
 
-Estendiamo il programma BASIC leggendo nelle locazioni 
+Estendiamo ora il programma BASIC leggendo nelle locazioni 
 del contatore che sfruttiamo a 'mo di cronometro:
 
 ```
