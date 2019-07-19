@@ -64,7 +64,7 @@ tastiera, il lampeggiamento del cursore ecc...
 
 Finita la routine di interrupt, il kernel da la possibilità all'utente di eseguire 
 eventualmente una sua routine assembly. A tale scopo, completato l'interrupt, 
-il kernel fa un jump alla locazione `$8012` nella quale normalemente 
+il kernel fa un jump in RAM alla locazione `$8012` nella quale normalemente 
 vi è contenuta una istruzione `RET`. Modificando questa in `JP` (jump)
 è possibile eseguire del proprio codice. 
 
@@ -78,9 +78,9 @@ In assembly Z80 sarà:
 counter EQU $8650
 
 timer:
-   ld hl, (counter)
+   ld  hl, (counter)
    inc hl
-   ld (counter), hl
+   ld  (counter), hl
    ret
 ```
 
@@ -93,9 +93,10 @@ Da BASIC potremo poi accedere al contatore semplicemente leggendolo con `PEEK`:
 T=PEEK(&H8650)+PEEK(&H8651)*256
 ```
 
-Adesso oltre alla routine di interrupt vera e propria, ci serve anche la routine che installa
-la stessa modificando il vettore del kernel a `$8012` appena descritto. Posiziamo tutta la routine all'indirizzo `$D000`, che è in una zona abbastanza alta nella RAM libera tale da non fare conflitto
-con il programma BASIC che poi la utilizzerà. 
+Oltre alla routine di interrupt vera e propria, ci serve anche il codice che installa
+la stessa modificando il vettore del kernel a `$8012` appena descritto. Posiziamo il tutto 
+all'indirizzo `$D000`, che è in una zona abbastanza alta nella RAM libera tale da non andare
+in conflitto con il programma BASIC. 
 
 ```
 org $d000
@@ -128,9 +129,8 @@ in vari modi, ad esempio dal `MON`itor con il comando:
 D000G
 ```
 
-Possiamo adesso estendere il programma BASIC leggendo 
-nelle locazioni del contatore che sfruttiamo a 'mo
-di cronometro:
+Estendiamo il programma BASIC leggendo nelle locazioni 
+del contatore che sfruttiamo a 'mo di cronometro:
 
 ```
 100 PRINT "SIMPLE ARGUMENT:";
@@ -148,9 +148,9 @@ di cronometro:
 220 PRINT PEEK(&H8650)+PEEK(&H8651)*256-T
 ```
 
-Eseguendo il programma troviamo conferma ai
+Eseguendolo troviamo conferma ai
 nostri sospetti: infatti la versione "consigliata"
-è più lenta (236 ticks contro 223) !
+è un tantino più lenta (236 ticks contro 223) !
 
 ![screenshot](screenshot.png)
 
