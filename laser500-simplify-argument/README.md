@@ -23,8 +23,8 @@ Fra questi ve n'è uno che mi ha insospettito:
 
 ![manual page](manual_page_160_snip.png)
 
-Secondo quanto consigliato, rendere l'argomento di una funzione 
-più semplice ne aumenterebbe la velocità di esecuzione. Ossia
+Secondo quanto consigliato, rendere più semplice l'argomento di una funzione 
+ne aumenterebbe la velocità di esecuzione. Ossia
 ```
 A=3^2+17-22/3:A=INT(A)
 ```
@@ -37,17 +37,15 @@ Ciò mi è sembrato piuttosto controintuitivo, così ho voluto
 mettere alla prova quanto affermato scrivendo un piccolo programma 
 di test in BASIC.
 
-Dopotutto basta mettere le istruzioni incrimante a confronto
+Dopotutto basta mettere le istruzioni incriminate a confronto
 dentro un ciclo `FOR`, allo scopo di redere apprezzabile 
 la differenza di tempo:
 
 ```
-119 REM versione suggerita
 120 FOR I=1 TO 100
 130 A=3^2+17-22/3:A=INT(A)
 140 NEXT
 
-189 REM versione sconsigliata
 190 FOR I=1 TO 100
 200 A=INT(3^2+17-22/3)
 210 NEXT
@@ -55,27 +53,27 @@ la differenza di tempo:
 
 Adesso basterebbe contare il tempo impiegato nei due `FOR`; vi
 è però un problema: il BASIC del Laser 500 non dispone di un meccanismo
-per misurare il trascorrere del tempo (per intederci, l'equivalente 
+per misurare il trascorrere del tempo (l'equivalente 
 di `TI` o `TI$`), possiamo però ricorrere ad uno stratagemma.
 
 Nel Laser 500 il segnale `VSYNC` del chip video è collegato direttamente
 al pin `/INT` (interrupt) della CPU Z80. Questo fa si che ad ogni inizio 
-della pagina video, cioè esattamente ogni 20 millisecondi, venga generato 
-un interrupt sulla CPU; questo interrupt è utilizzato dal kernal del Laser 
-per eseguire alcune funzioni di base, come ad esempio la scansione della 
+del ritracciamento della pagina video, cioè esattamente ogni 20 millisecondi, 
+venga generato un interrupt sulla CPU; questo interrupt è utilizzato dal kernal 
+del Laser per eseguire alcune funzioni di base, come ad esempio la scansione della 
 tastiera, il lampeggiamento del cursore ecc... 
 
 Finita la routine di interrupt, il kernel da la possibilità all'utente di eseguire 
-eventualmente una propria routine assembly. A tale scopo, terminata la
-propria routine, il kernel fa un jump alla locazione `$8012` nella quale normalemente 
+eventualmente una sua routine assembly. A tale scopo, completato l'interrupt, 
+il kernel fa un jump alla locazione `$8012` nella quale normalemente 
 vi è contenuta una istruzione `RET`. Modificando questa in `JP` (jump)
-è possibile eseguire del proprio nostro codice. 
+è possibile eseguire del proprio codice. 
 
 L'idea è quella di scrivere una piccola routine di interrupt che incrementi 
 un contatore in memoria, il quale diverrà un sostituto della variabile `TI` non
-presente nel BASIC.
+presente nel BASIC del Laser.
 
-In assembly Z80 la routine sarà:
+In assembly Z80 sarà:
 
 ```
 counter EQU $8650
@@ -89,18 +87,16 @@ timer:
 
 dove `$8650` è una word a 16 bit nella memoria bassa del Laser 500 normalmente non utilizzata. 
 Il nostro contatore è dunque a 16 bit, questo ci consente di contare fino a circa 21 minuti prima
-che questo raggiunga il massimo e riparta da zero (ossia 65536 * 20ms).
+che questo raggiunga il massimo e riparta da zero (ossia 65536 x 20ms).
 
-Da BASIC potremo poi accedere al contatore semplicemente leggendolo con `PEEK`, ad esempio:
+Da BASIC potremo poi accedere al contatore semplicemente leggendolo con `PEEK`:
 ```
 T=PEEK(&H8650)+PEEK(&H8651)*256
 ```
 
-Oltre alla routine di interrupt vera e propria, ci serve anche la routine che installa
-la stessa modificando il vettore del kernel a `$8012` appena descritto.
-
-Posiziamo tutta la routine all'indirizzo `$D000`, che è in una zona abbastanza alta nella 
-RAM BASIC libera. 
+Adesso oltre alla routine di interrupt vera e propria, ci serve anche la routine che installa
+la stessa modificando il vettore del kernel a `$8012` appena descritto. Posiziamo tutta la routine all'indirizzo `$D000`, che è in una zona abbastanza alta nella RAM libera tale da non fare conflitto
+con il programma BASIC che poi la utilizzerà. 
 
 ```
 org $d000
@@ -127,7 +123,7 @@ timer:
    ret   
 ```
 
-Dopo averla caricato la routine in RAM, possiamo eseguire la stessa
+Dopo aver caricato la routine in RAM, possiamo eseguire la stessa
 in vari modi, ad esempio dal `MON`itor con il comando:
 ```
 D000G
@@ -154,8 +150,8 @@ di cronometro:
 ```
 
 Eseguendo il programma troviamo conferma ai
-nostri sospetti, infatti la versione "consigliata"
-è più lenta (236 ticks contro 223).
+nostri sospetti: infatti la versione "consigliata"
+è più lenta (236 ticks contro 223) !
 
 ![screenshot](screenshot.png)
 
