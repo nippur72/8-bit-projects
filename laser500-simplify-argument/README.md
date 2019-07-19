@@ -21,7 +21,7 @@ su come rendere più efficienti i programmi BASIC.
 
 Fra questi ve n'è uno che mi ha insospettito:
 
-[manual_page_160_snip.png]()
+![manual page](manual_page_160_snip.png)
 
 Secondo quanto consigliato, rendere l'argomento di una funzione 
 più semplice ne aumenterebbe la velocità di esecuzione. Ossia
@@ -157,7 +157,7 @@ Eseguendo il programma troviamo conferma ai
 nostri sospetti, infatti la versione "consigliata"
 è più lenta (236 ticks contro 223).
 
-[](screenshot.png)
+![screenshot](screenshot.png)
 
 Vatti a fidare dei manuali!
 
