@@ -10,8 +10,8 @@ il Microsoft BASIC da persone non autorizzate, e a comunicare
 alla Video Technology l'esatta ubicazione dove si trovano
 le copie dello stesso (!).
 
-Di recente si è reso possibile approfondire i dettagli della
-specifica implementazione dell'interprete BASIC del laser 500, grazie al 
+Di recente si è reso possibile approfondire i dettagli dell'
+implementazione dell'interprete del Laser 500 grazie al 
 manuale della macchina di cui ne esistono solo poche e rare copie, 
 ma che è stato gentilmente scansionato e condiviso dal retro-appasionato
 Carletto Provetto, a cui va la nostra eterna gratitudine. 
@@ -68,7 +68,7 @@ il kernel fa un jump in RAM alla locazione `$8012` nella quale normalemente
 vi è contenuta una istruzione `RET`. Modificando questa in `JP` (jump)
 è possibile eseguire del proprio codice. 
 
-L'idea è quella di scrivere una piccola routine di interrupt che incrementi 
+L'idea è quella di scrivere una piccola routine che incrementi 
 un contatore in memoria, il quale diverrà un sostituto della variabile `TI` non
 presente nel BASIC del Laser.
 
@@ -86,7 +86,7 @@ timer:
 
 dove `$8650` è una word a 16 bit nella memoria bassa del Laser 500 normalmente non utilizzata. 
 Il nostro contatore è dunque a 16 bit, questo ci consente di contare fino a circa 21 minuti prima
-che questo raggiunga il massimo e riparta da zero (ossia 65536 x 20ms).
+che raggiunga il massimo e riparta da zero (ossia 65536 x 20ms).
 
 Da BASIC potremo poi accedere al contatore semplicemente leggendolo con `PEEK`:
 ```
@@ -113,14 +113,6 @@ install:
    ld (0x8012), a      ; scrive "JP"
    ei                  ; riabilita gli interrupt
    ret
-
-counter EQU $8650
-
-timer:
-   ld hl, (counter)
-   inc hl
-   ld (counter), hl
-   ret   
 ```
 
 Dopo aver caricato la routine in RAM, possiamo eseguire la stessa
