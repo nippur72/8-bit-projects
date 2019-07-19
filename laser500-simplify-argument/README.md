@@ -10,16 +10,15 @@ il Microsoft BASIC da persone non autorizzate, e a comunicare
 alla Video Technology l'esatta ubicazione dove si trovano
 le copie dello stesso (!).
 
-Di recente si è reso possibile approfondire i dettagli di questa
-specifica implementazione dell'interprete BASIC, grazie al 
-manuale della macchina di cui ne esistono solo poche rare copie, 
-ma che è stato gentilmente scansionato e condiviso dal retroamatore
+Di recente si è reso possibile approfondire i dettagli della
+specifica implementazione dell'interprete BASIC del laser 500, grazie al 
+manuale della macchina di cui ne esistono solo poche e rare copie, 
+ma che è stato gentilmente scansionato e condiviso dal retro-appasionato
 Carletto Provetto, a cui va la nostra eterna gratitudine. 
 
 Sfogliando il manuale, a pagina 160 si trovano alcuni consigli 
-su come rendere più efficienti i programmi BASIC.
-
-Fra questi ve n'è uno che mi ha insospettito:
+su come rendere più efficienti i programmi BASIC. Fra questi ve n'è 
+uno che mi ha insospettito:
 
 ![manual page](manual_page_160_snip.png)
 
