@@ -12,11 +12,11 @@ le copie dello stesso (!).
 
 Di recente si è reso possibile approfondire i dettagli 
 dell'implementazione dell'interprete del Laser 500 grazie al 
-manuale della macchina di cui ne esistono solo poche copie, 
-ma che è stato gentilmente scansionato e condiviso in rete 
+manuale della macchina, di cui ne esistono solo poche copie, 
+che è stato gentilmente scansionato e condiviso in rete 
 dal retro-appassionato Carletto Provetto, a cui va la nostra 
 eterna gratitudine. Il file è scaricabile direttamente
-dal suo sito a [questo indirizzo](http://www.radioedintorni.it/Immagini/RetroComputer/RC-Manuali/Vtech-Laser-500.pdf)
+dal suo sito a [questo indirizzo](http://www.radioedintorni.it/Immagini/RetroComputer/RC-Manuali/Vtech-Laser-500.pdf).
 
 A differenza di molti altri manuali dei computer dell'epoca 
 (mi riferisco soprattutto ai Commodore) quello del Laser 500
@@ -28,10 +28,12 @@ un manuale veramente ben fatto, come si faceva una volta.
 All'epoca in Italia circolava il manuale in lingua francese piuttosto
 che in inglese, e ricordo che la ditta che distribuiva il Laser in 
 in Italia (la Scheidegger) commissionò una traduzione in italiano 
-che però non fu portata mai a compimento. Rricordo ebbi modo di
-vedere le bozze della traduzione ed erano veramente ridicole, poichè
-i termini tecnici erano stati tradotti fuori dal contesto, ad
+che però non fu portata mai a compimento. Mi capitò di
+leggere le bozze della traduzione ed erano veramente ridicole poichè
+i termini tecnici erano stati tradotti fuori dal contesto; ad
 esempio `bit` erano diventato `morso` (!). 
+
+Ma torniamo al BASIC.
 
 Sfogliando il manuale, a pagina 160 si trovano alcuni consigli 
 su come rendere più efficienti i programmi BASIC. Fra questi ve n'è 
@@ -53,7 +55,7 @@ Ciò mi è sembrato piuttosto controintuitivo, così ho voluto
 mettere alla prova quanto affermato scrivendo un piccolo programma 
 di test.
 
-Dopotutto basta mettere le istruzioni incriminate a confronto
+Dopotutto è sufficiente mettere le istruzioni incriminate a confronto
 dentro un ciclo `FOR`, allo scopo di redere apprezzabile 
 la differenza di tempo:
 
@@ -67,12 +69,12 @@ la differenza di tempo:
 210 NEXT
 ```
 
-Adesso basterebbe contare il tempo impiegato nei due `FOR`; vi
+Adesso basterebbe contare il tempo impiegato nei due `FOR`, vi
 è però un problema: il BASIC del Laser 500 non dispone di un meccanismo
 per misurare il trascorrere del tempo (l'equivalente 
-di `TI` o `TI$`), possiamo però ricorrere ad uno stratagemma.
+della variabile `TI` o `TI$`), possiamo però ricorrere ad uno stratagemma.
 
-Come si evince dallo stesso manuale, nel Laser 500 il segnale 
+Come si evince dal manuale, nel Laser 500 il segnale 
 `VSYNC` del chip video è collegato direttamente al pin `/INT` (interrupt) 
 della CPU Z80. Questo fa si che ad ogni inizio del ritracciamento 
 della pagina video, cioè esattamente ogni 20 millisecondi, 
@@ -102,9 +104,10 @@ timer:
    ret
 ```
 
-dove `$8650` è una word a 16 bit nella memoria bassa del Laser 500 normalmente non utilizzata. 
-Il nostro contatore è dunque a 16 bit, questo ci consente di contare fino a circa 21 minuti prima
-che raggiunga il massimo e riparta da zero (ossia 65536 x 20ms).
+dove `$8650` è una word nella memoria bassa del Laser 500 normalmente non utilizzata. 
+Il nostro contatore è dunque a 16 bit, questo ci consente di contare fino a 21 minuti circa prima
+che raggiunga il massimo e riparta da zero (ossia 65536 x 20ms), un tempo più che sufficiente per
+i nostri scopi.
 
 Da BASIC potremo poi accedere al contatore semplicemente leggendolo con `PEEK`:
 ```
@@ -112,7 +115,7 @@ T=PEEK(&H8650)+PEEK(&H8651)*256
 ```
 
 Oltre alla routine di interrupt vera e propria, ci serve anche il codice che installa
-la stessa modificando il vettore del kernel a `$8012` appena descritto. Posiziamo il tutto 
+la stessa routine modificando il vettore del kernel a `$8012` appena descritto. Posiziamo il tutto 
 all'indirizzo `$D000`, che è in una zona abbastanza alta nella RAM libera tale da non andare
 in conflitto con il programma BASIC. 
 
@@ -140,7 +143,7 @@ D000G
 ```
 
 Estendiamo ora il programma BASIC leggendo nelle locazioni 
-del contatore che sfruttiamo a 'mo di cronometro:
+del contatore che sfruttiamo a mo' di cronometro:
 
 ```
 100 PRINT "SIMPLE ARGUMENT:";
@@ -165,4 +168,9 @@ nostri sospetti: infatti la versione "consigliata"
 ![screenshot](screenshot.png)
 
 Vatti a fidare dei manuali!
+
+Trovate i sorgenti e gli eseguibili di questo piccolo esperimento
+sul mio [repo su GitHub](https://github.com/nippur72/8-bit-projects/tree/master/laser500-simplify-argument)
+
+
 
