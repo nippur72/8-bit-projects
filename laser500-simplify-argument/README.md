@@ -2,7 +2,7 @@
 
 Il Laser 500 dispone di un ottimo interprete BASIC; è siglato
 "Video Technology BASIC 1.0" ma in realtà non è altro che 
-un MicroSOFT BASIC di ultima generazione, adattato per la macchina e
+un Microsoft BASIC di ultima generazione, adattato per la macchina e
 concesso in licenza alla Video Technology. Addirittura
 in fondo al manuale si trova un form di "non-disclosure agreement"
 con cui l'utente si impegna a custodire e non fare utilizzare 
@@ -10,11 +10,28 @@ il Microsoft BASIC da persone non autorizzate, e a comunicare
 alla Video Technology l'esatta ubicazione dove si trovano
 le copie dello stesso (!).
 
-Di recente si è reso possibile approfondire i dettagli dell'
-implementazione dell'interprete del Laser 500 grazie al 
-manuale della macchina di cui ne esistono solo poche e rare copie, 
-ma che è stato gentilmente scansionato e condiviso dal retro-appasionato
-Carletto Provetto, a cui va la nostra eterna gratitudine. 
+Di recente si è reso possibile approfondire i dettagli 
+dell'implementazione dell'interprete del Laser 500 grazie al 
+manuale della macchina di cui ne esistono solo poche copie, 
+ma che è stato gentilmente scansionato e condiviso in rete 
+dal retro-appassionato Carletto Provetto, a cui va la nostra 
+eterna gratitudine. Il file è scaricabile direttamente
+dal suo sito a [questo indirizzo](http://www.radioedintorni.it/Immagini/RetroComputer/RC-Manuali/Vtech-Laser-500.pdf)
+
+A differenza di molti altri manuali dei computer dell'epoca 
+(mi riferisco soprattutto ai Commodore) quello del Laser 500
+è estremamente dettagliato, contiene tutte ma proprio tutte
+le informazioni necessarie, dal BASIC all'hardware, compresi
+gli schemi elettrici per eventuali riparazioni. Insomma
+un manuale veramente ben fatto, come si faceva una volta.
+
+All'epoca in Italia circolava il manuale in lingua francese piuttosto
+che in inglese, e ricordo che la ditta che distribuiva il Laser in 
+in Italia (la Scheidegger) commissionò una traduzione in italiano 
+che però non fu portata mai a compimento. Rricordo ebbi modo di
+vedere le bozze della traduzione ed erano veramente ridicole, poichè
+i termini tecnici erano stati tradotti fuori dal contesto, ad
+esempio `bit` erano diventato `morso` (!). 
 
 Sfogliando il manuale, a pagina 160 si trovano alcuni consigli 
 su come rendere più efficienti i programmi BASIC. Fra questi ve n'è 
@@ -34,7 +51,7 @@ A=INT(3^2+17-22/3)
 
 Ciò mi è sembrato piuttosto controintuitivo, così ho voluto 
 mettere alla prova quanto affermato scrivendo un piccolo programma 
-di test in BASIC.
+di test.
 
 Dopotutto basta mettere le istruzioni incriminate a confronto
 dentro un ciclo `FOR`, allo scopo di redere apprezzabile 
@@ -55,17 +72,18 @@ Adesso basterebbe contare il tempo impiegato nei due `FOR`; vi
 per misurare il trascorrere del tempo (l'equivalente 
 di `TI` o `TI$`), possiamo però ricorrere ad uno stratagemma.
 
-Nel Laser 500 il segnale `VSYNC` del chip video è collegato direttamente
-al pin `/INT` (interrupt) della CPU Z80. Questo fa si che ad ogni inizio 
-del ritracciamento della pagina video, cioè esattamente ogni 20 millisecondi, 
-venga generato un interrupt sulla CPU; questo interrupt è utilizzato dal kernal 
+Come si evince dallo stesso manuale, nel Laser 500 il segnale 
+`VSYNC` del chip video è collegato direttamente al pin `/INT` (interrupt) 
+della CPU Z80. Questo fa si che ad ogni inizio del ritracciamento 
+della pagina video, cioè esattamente ogni 20 millisecondi, 
+venga generato un interrupt sulla CPU; questo poi è utilizzato dal kernal 
 del Laser per eseguire alcune funzioni di base, come ad esempio la scansione della 
 tastiera, il lampeggiamento del cursore ecc... 
 
 Finita la routine di interrupt, il kernel da la possibilità all'utente di eseguire 
 eventualmente una sua routine assembly. A tale scopo, completato l'interrupt, 
 il kernel fa un jump in RAM alla locazione `$8012` nella quale normalemente 
-vi è contenuta una istruzione `RET`. Modificando questa in `JP` (jump)
+vi è contenuta una istruzione `RET`. Modificando questa in `JP miaroutine` 
 è possibile eseguire del proprio codice. 
 
 L'idea è quella di scrivere una piccola routine che incrementi 
