@@ -1,0 +1,82 @@
+include <c64.lm>
+include <macros.lm>
+include <macros_16.lm>
+
+   processor 6502
+   org BASIC_RAM
+
+basic start
+   2020 sys {main}
+basic end
+
+// uso un puntatore in pagina zero, come sostituto della variabile "i"
+const ptr  = 250
+
+// variabili c,r in pagina zero
+const cc = 252
+const rr = 248
+
+main:   
+   ldy #0
+
+   // ****** linea 10 ******
+   ld16 ptr, #1024   
+   
+   do
+      lda #81
+      sta (ptr),y
+      inc16 ptr
+      cmp16 ptr, #2023
+   loop while not zero
+
+   // ****** linee 30-50 ******
+   ld cc, #0
+   ld rr, #0
+
+   ld16 ptr, #55296
+   do
+      lda rr         ; poke i,((r+c) and 15)
+      add cc         ;
+      and #15        ;
+      sta (ptr),y    ;
+
+      inc cc
+      if cc=#40 then
+         lda #0
+         sta cc
+         inc rr
+      end if
+
+      inc16 ptr
+      cmp16 ptr, #56295
+   loop while not zero
+
+   // ****** linee 60-70 ******
+
+   do
+      ld16 ptr, #55296
+      do
+         lda (ptr),y    ; c=peek(i): if c=256 then c=0
+
+         clc            ; c=(c+1) and 15
+         adc #1         ;
+         and #15        ;
+
+         sta (ptr),y    ; poke i,c
+
+         inc16 ptr
+         cmp16 ptr, #56295
+      loop while not zero
+   loop while zero      ; cicla forever
+
+
+/*
+// traccia originale della challenge
+10 for i=1024 to 2023:poke i,81:next
+30 for i=55296 to 56295
+40 poke i,((r+c) and 15):c=c+1:if c=40 then c=0:r=r+1
+50 next
+60 for i=55296 to 56295:c=peek(i):c=(c+1) and 15: if c=256 then c=0
+70 poke i,c:next
+80 goto 60
+*/

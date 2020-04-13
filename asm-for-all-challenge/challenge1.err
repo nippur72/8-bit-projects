@@ -1,0 +1,347 @@
+
+
+GETIN   = $ffe4     
+CLRSCN  = $e544     
+PRNSTR  = $ab1e     
+GOHOME  = $e566     
+PRNINT  = $bdcd     
+
+
+
+CURSOR_PTR  = 209
+JIFFY_CLOCK = 162
+CRSRCOL     = 646
+MEMORY_CONFIG = 1
+
+
+
+COLOR_BLACK   = 0
+COLOR_WHITE   = 1
+COLOR_RED     = 2
+COLOR_CYAN    = 3
+COLOR_MAGENTA = 4
+COLOR_GREEN   = 5
+COLOR_BLUE    = 6
+COLOR_YELLOW  = 7
+
+
+
+
+const SCREEN_COLS  = 40
+const SCREEN_ROWS  = 25
+const VIDEO_RAM    = 1024
+const COLOR_RAM    = 55296
+const COLOR_PAGE_OFFSET = ((COLOR_RAM - VIDEO_RAM) / 256)
+const BASIC_RAM   = 2049
+const RASTER      = $d012
+const ROMCHAR     = $D000
+const BORDER      = 53280
+const BACKGROUND  = 53281
+
+
+    
+MACRO cls
+   jsr CLRSCN
+END MACRO	 
+    
+MACRO print
+   lda #[[{1}_pos]%256]
+   sta cursor_ptr
+   lda #[[{1}_pos]/256]
+   sta cursor_ptr+1 
+   lda #[{1}%256]
+   ldy #[{1}/256]
+   jsr PRNSTR
+   #ifdef VIC20 || C64 then jsr GOHOME         
+END MACRO 
+       
+MACRO waitkey
+   pha 
+   txa : pha
+   tya : pha
+   do        
+      jsr GETIN
+   loop while zero
+   pla : tay   
+   pla : tax
+   pla      
+END MACRO
+
+MACRO color const
+   ld CRSRCOL, #{1}   
+END MACRO
+
+MACRO color mem
+   ld CRSRCOL, {1}
+END MACRO
+
+MACRO set_border mem
+   ld BORDER, {1}
+END MACRO
+
+MACRO set_border const
+   ld BORDER, #{1}
+END MACRO
+
+MACRO set_background mem
+   ld BACKGROUND, {1}
+END MACRO
+
+MACRO set_background const
+   ld BACKGROUND, #{1}
+END MACRO
+
+
+
+
+
+
+MACRO poke mem, const
+   lda #{2}
+   sta {1}
+END MACRO
+
+MACRO call mem
+   jsr {1}
+END MACRO
+
+macro shl
+   asl {0}
+end macro
+
+macro shr
+   lsr {0}
+end macro          
+
+macro ret
+   rts
+end macro
+
+macro push "a"           
+   pha
+end macro     
+
+macro pop "a"
+   pla
+end macro     
+
+macro or mem
+   ora {1}
+end macro
+
+macro or const
+   ora #{1}
+end macro
+
+
+
+
+
+macro ld "a", mem
+    lda {2}
+end macro
+
+macro ld "a", const
+    lda #{2}
+end macro
+
+macro ld "a", indirect
+    ldy #0
+    lda {2},y
+end macro
+
+macro ld "x", mem
+    ldx {2}
+end macro
+
+macro ld "x", const
+    ldx #{2}
+end macro
+
+macro ld "y", mem
+    ldy {2}
+end macro
+
+macro ld "y", const
+    ldy #{2}
+end macro
+
+macro ld mem, "a"
+    sta {1}
+end macro
+
+macro ld mem, "x"
+    stx {1}
+end macro
+
+macro ld mem, "y"
+    sty {1}
+end macro
+
+macro ld "a", "x"
+    txa
+end macro
+
+macro ld "a", "y"
+    tya
+end macro
+
+macro ld "x", "a"
+    tax
+end macro
+
+macro ld "y", "a"
+    tay
+end macro
+
+MACRO ld "ya", const
+   lda #(({2}) MOD 256)
+   ldy #(({2})/256)
+END MACRO
+
+MACRO ld "ya", mem
+   lda {1}
+   ldy {1}+1
+END MACRO
+
+macro ld mem, mem
+    lda {2}    
+    sta {1}
+end macro
+
+macro ld mem, const
+    lda #{2}
+    sta {1}
+end macro
+
+macro ld indirect, "a"
+    ldy #0
+    sta {1},y
+end macro
+
+
+
+
+
+MACRO add mem
+   clc
+   adc {1}
+END MACRO
+
+MACRO add const
+   clc
+   adc #{1}
+END MACRO
+
+MACRO add mem, const
+   clc
+   lda {1}
+   adc #{2}
+   sta {1}
+END MACRO
+
+MACRO add mem, mem
+   clc
+   lda {1}
+   adc {2}
+   sta {1}
+END MACRO
+
+MACRO sub mem
+   sec
+   sbc {1}
+END MACRO
+
+MACRO sub const
+   sec
+   sbc #{1}
+END MACRO
+
+MACRO sub mem, const
+   sec
+   lda {1}
+   sbc #{2}
+   sta {1}
+END MACRO
+
+MACRO sub mem, mem
+   sec
+   lda {1}
+   sbc {2}
+   sta {1}
+END MACRO
+
+include <macro_16.lm>
+
+   processor 6502
+   org BASIC_RAM
+
+basic start
+   10 print "start"
+   20 sys {main}
+   30 print "end"
+basic end
+
+
+BUF  DS.W 3001 * 2
+PA   WORD 0
+PB   WORD 0
+PC   WORD 0  
+T    WORD 0
+N    WORD 1
+E    WORD -2
+F    WORD 2938
+S    WORD 0
+P    WORD 0
+
+main:
+   ld16 s, #333
+   do
+      jsr loop_interno
+      cmp16 s, #0
+   loop while not zero
+   rts
+
+
+  
+             
+                          
+                
+                      
+                    
+                
+                      
+                    
+                 
+                       
+                                       
+       
+          
+                 
+                                          
+       
+                                     
+  
+
+  
+                                               
+             
+                          
+                
+                      
+                    
+                
+                      
+                    
+                 
+                       
+                                       
+       
+          
+
+                 
+                                          
+       
+                                     
+  
+
