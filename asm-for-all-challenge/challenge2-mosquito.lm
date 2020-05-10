@@ -1,0 +1,114 @@
+// ****************************************************************
+// ASM FOR ALL CHALLENGE 02-MOSQUITO
+// svolgimento di Antonino Porcino
+// https://github.com/nippur72/8-bit-projects/asm-for-all-challenge
+// ****************************************************************
+
+// Anche qui utilizzo lo strumento ASMPROC (https://github.com/nippur72/asmproc) 
+// ho lasciato il codice quasi privo di commento
+// perchè penso sia autoesplicativo
+
+   processor 6502
+
+   include <macros.lm>
+   include <macros_16.lm>
+   include <c64.lm>
+
+   org BASIC_RAM
+
+   basic start
+      10 sys {mosquito}
+   basic end
+
+const END_SCREEN = VIDEO_RAM + SCREEN_COLS * SCREEN_ROWS
+
+dim ptr as word at 250      
+
+sub mosquito()
+   ; posizione iniziale della mosca
+   ld16 ptr, #(VIDEO_RAM + 11*SCREEN_COLS + 20)
+
+   ldy #0           ; tengo y sempre a zero per poter usare STA(),y
+
+   do
+      ld a, #32+128 ; cancella mosca
+      sta (ptr),y   ;      
+
+      jsr Random    ; x = numero random 0-3
+      and #3        ;    
+
+      ; nord
+      if a=#0 then                  
+         cmp16 ptr, #(VIDEO_RAM+SCREEN_COLS)
+         if carry then 
+            sub16 ptr, #SCREEN_COLS
+         end if
+      else
+         ; est
+         if a=#1 then                  
+            cmp16 ptr, #(END_SCREEN-SCREEN_COLS)
+            if not carry then                                  
+               inc16 ptr
+            end if
+         else
+            ; sud
+            if a=#2 then         
+               cmp16 ptr, #(END_SCREEN-SCREEN_COLS)
+               if not carry then 
+                  add16 ptr, #SCREEN_COLS
+               end if
+            else            
+               ; ovest               
+               cmp16 ptr, #(VIDEO_RAM+SCREEN_COLS)
+               if carry then 
+                  dec16 ptr
+               end if               
+            end if
+         end if
+      end if
+
+      ld a, #42+128  ; disegna mosca
+      sta (ptr),y    ;
+
+      jsr ritardo
+      
+   loop while zero       ; sempre zero, cicla forever
+
+end sub
+
+; implementa un ciclo di ritardo
+sub ritardo()
+   dim counter as word at 252   
+   ld16 counter, #$0100
+   do
+      dec16 counter
+      cmp16 counter, #0
+   loop while not zero
+   rts
+end sub
+
+; =====================================================================
+; Name: Random
+;
+; Purpose: genera un numero random tra 0-255
+;
+; Returns: A=numero random. Il numero si trova anche nella cella "RandomNumber"
+;
+; Nota: presa dal forum Denial e adattata per il C64:
+;       http://sleepingelephant.com/ipw-web/bulletin/bb/viewtopic.php?f=2&t=7878
+;       
+;       La sequenza random viene resa ancora più casuale facendo uno XOR
+;       con il Timer del C64 (locazione $dc04). Il seme di partenza deve
+;       essere un numero diverso da zero (qui è #$01).
+;
+;       Fa uso di codice auto-modificante (sintassi **RandomNumber($01))
+; =====================================================================
+
+sub Random()
+   lda #**RandomNumber($01)
+   asl
+   if not carry then eor #$4d
+   sta RandomNumber
+   eor $dc04
+   if not zero then sta RandomNumber
+end sub

@@ -1,37 +1,78 @@
+// ****************************************************************
+// ASM FOR ALL CHALLENGE 01
+// svolgimento di Antonino Porcino
+// https://github.com/nippur72/8-bit-projects/asm-for-all-challenge
+// ****************************************************************
+
+/*
+In questa mia interpretazione ho voluto dare risalto al linguaggio/strumento
+ASMPROC (https://github.com/nippur72/asmproc) facendo vedere come possa  
+migliorare la leggibilità del sorgente Assembly 6502 e quindi aumentare
+notevolmente la velocità di sviluppo dei programmi.
+
+Quello che segue è in pratica la traduzione pari-pari 
+del listato BASIC in assembly ASMPROC, evitando volutamente
+di fare qualsiasi ottimizzazione (tranne quelle più ovvie).
+
+Si compila lanciando "m.bat". Necessita di ASMPROC e
+dell'assemblatore "DASM".
+*/
+
+
+; Include delle costanti e macro standard.
+; Fra le macro utilizzate in questo sorgente ci sono:
+; "ld16", "inc16" e "cmp16", che operano a 16 bit
+
 include <c64.lm>
 include <macros.lm>
 include <macros_16.lm>
 
+; imposta il punto di inizio del programma
+; BASIC_RAM è la costante di inizio free ram nel C64
+
    processor 6502
    org BASIC_RAM
 
+; Crea un prologo BASIC per lanciare il programma in L.M.
+; Questa è una caratteristica di ASMPROC che permette di
+; mischiare sorgente BASIC e ASSEMBLY insieme.
+
 basic start
-   2020 sys {main}
+   10 REM ASM-FOR-ALL CHALLENGE 01
+   20 REM BY ANTONINO PORCINO
+   30 SYS {main}
 basic end
 
-// uso un puntatore in pagina zero, come sostituto della variabile "i"
-const ptr  = 250
+; uso un puntatore in pagina zero 
+; come sostituto della variabile "i"
+const ptr = 250
 
-// variabili c,r in pagina zero
+; crea le due variabili c e r, sempre in pagina zero
+; uso i nomi "cc" e "rr" per non confonderli 
+; con "C" (carry) riservato in ASMPROC
+
 const cc = 252
 const rr = 248
 
+; arriva qui tramite basic: 30 SYS {main}
 main:   
+   ; il registro Y lo tengo sempre a zero in modo 
+   ; da usare  comodamente STA (),Y e LDA (),Y 
    ldy #0
 
    // ****** linea 10 ******
-   ld16 ptr, #1024   
-   
+   ld16 ptr, #1024      
    do
       lda #81
       sta (ptr),y
       inc16 ptr
-      cmp16 ptr, #2023
+      cmp16 ptr, #2023+1
    loop while not zero
 
    // ****** linee 30-50 ******
-   ld cc, #0
-   ld rr, #0
+
+   ld cc, #0     ; c=0 e r=0 sono definite in
+   ld rr, #0     ; maniera implicita nel sorgente BASIC
 
    ld16 ptr, #55296
    do
@@ -42,13 +83,12 @@ main:
 
       inc cc
       if cc=#40 then
-         lda #0
-         sta cc
+         ld cc, #0
          inc rr
       end if
 
       inc16 ptr
-      cmp16 ptr, #56295
+      cmp16 ptr, #56295+1
    loop while not zero
 
    // ****** linee 60-70 ******
@@ -56,22 +96,26 @@ main:
    do
       ld16 ptr, #55296
       do
-         lda (ptr),y    ; c=peek(i): if c=256 then c=0
+         lda (ptr),y    ; c=peek(i)
 
          clc            ; c=(c+1) and 15
          adc #1         ;
-         and #15        ;
+         and #15        ; 
 
          sta (ptr),y    ; poke i,c
 
          inc16 ptr
-         cmp16 ptr, #56295
+         cmp16 ptr, #56295+1
       loop while not zero
    loop while zero      ; cicla forever
 
+; nota ho omesso "if c=256 then c=0" alla riga 60
+; perchè c è sempre diverso da 256
+
+
+; traccia originale della challenge
 
 /*
-// traccia originale della challenge
 10 for i=1024 to 2023:poke i,81:next
 30 for i=55296 to 56295
 40 poke i,((r+c) and 15):c=c+1:if c=40 then c=0:r=r+1
