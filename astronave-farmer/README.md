@@ -15,7 +15,7 @@ portarlo a compimento.
 Di Astronave Farmer, oltre all'avventura in sé, mi affascinava il fatto che il computer
 potesse comprendere le frasi digitate in lingua italiana, reagendo con un comportamento 
 intelligente. C'era un alone di mistero intorno al cosidetto "parser", l'algoritmo
-che analizzava il testo inserito comprendendone il significato; proprio non avevo la 
+che analizzava il testo inserito comprendendone il significato; non avevo la 
 più pallida idea di come potesse funzionare, per me era quasi magico!
 
 Per molti anni ho cercato invano di ritrovare il listato di questo gioco, speravo che 
@@ -27,7 +27,7 @@ Poi finalmente il link giusto, ed ecco il numero di MC MicroComputer con il list
 bello e pronto in formato PDF!
 
 Non potevo far altro che digitarlo e assaporare il piacere di giocarci nuovamente 
-dopo trent'anni, peraltro sullo stesso computer di allora, il Laser 500. Che emozione
+dopo quasi trentacinque anni, peraltro sullo stesso computer di allora: il Laser 500. Che emozione
 rivedere quella scritta insistere sullo schermo ... "COSA DEVO FARE?"
 
 Il sorgente originale è scritto in MBASIC per lo Sharp MZ80B, ma risulta compatibile
@@ -36,7 +36,12 @@ nessuna istruzione specifica dello Sharp; i codici per pilotare lo schermo (`CLS
 `NEWLINE`) sono parametrici per cui è molto facile adattarlo a qualsiasi macchina.
 
 Una curiosità: il finale del gioco è criptato tramite delle istruzioni `DATA`, l'autore
-ha voluto così evitare che venisse rivelato durante la digitazione del listato.
+ha voluto così evitare che venisse rivelato durante la digitazione del listato:
+```
+9210 READ X:IF X=255 THEN 9230
+9220 PRINT CHR$(X-OGG(8)-LO);:GOTO 9210
+10040 DATA 89, ... ,255
+```
 
 Stranamente, il sorgente contiene due bug, uno dei quali impedisce il completamento
 dell'adventure. Alla linea `2185` manca l'istruzione `O=21` che collega l'uscita
@@ -44,7 +49,7 @@ OVEST alla stanza n.21 sulla mappa, bloccando quindi il giocatore.
 
 Il gioco è previsto per schermi a 80 colonne, ma ne ho fatto un adattamento anche
 per 40 colonne considerato che la maggior parte degli home computer dell'epoca 
-non poteva visualizzare le 80 colonne.
+avevano schermi di dimensioni inferiori.
 
 Sul repo di GitHub, oltre al sorgente originale ridigitato in formato testo, 
 trovate alcuni adattamenti già pronti per essere giocati. Se fate il port su altri 
@@ -52,18 +57,18 @@ computer, mi piacerebbe averne notizia in modo da aggiungere il programma alla l
 
 Adattamenti:
 
-- [Laser 500](astronave_farmer.laser500.bin). Questa è la versione più fedele all'originale per `MBasic` 
+- [Laser 500](astronave_farmer.laser500.bin): questa è la versione più fedele all'originale per `MBasic` 
 di Mario Pettenghi, poichè il BASIC 1.0 del Laser 500 è perfettamente compatibile.
 Potete giocarci direttamente sul mio [emulatore on-line](https://nippur72.github.io/laser500emu/?load=astronave_farmer.bin).
 
-- [Commodore 64](astronave_farmer.c64.prg). Adattato per girare a 40 colonne. In questa versione ho 
+- [Commodore 64](astronave_farmer.c64.prg): adattato per girare a 40 colonne. In questa versione ho 
 dovuto simulare la funzione `INSTR()` che manca nel CBM BASIC V2.0; ho anche dovuto 
 riscrivere alcuni `IF THEN ELSE` a causa della mancaza dell'istruzione `ELSE`.
 
-- [Commodore 128](astronave_farmer.c128.prg) in modalità 80 colonne. L'unica differenza col sorgente 
+- [Commodore 128](astronave_farmer.c128.prg): in modalità 80 colonne. L'unica differenza col sorgente 
 originale è che l'istruzione `ELSE` nel BASIC del 128 deve essere preceduta dal 
 carattere `:` quando è sulla stessa riga dell'`IF`.
 
-- [Commodore 16/Plus 4](astronave_farmer.c16.prg). Simile alla versione 40 colonne per C64.
+- [Commodore 16/Plus 4](astronave_farmer.c16.prg): simile alla versione 40 colonne per C64.
 
 
