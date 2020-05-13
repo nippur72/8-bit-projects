@@ -181,7 +181,7 @@
 8020 if lo<27 and lo>23 then print "STUDIA I PUNTI....":return
 8030 if lo=17 then print "CI VORREBBE IL CODICE COMPUTERIZZATO...":return
 8040 if lo=18 and fl(3)=0 then print "SE TI FOSSI PREPARATO PRIMA, MAGARI LEGGENDO QUALCOSA DI UTILE...":return
-8050 if lo=18 then print print "EPPURE QUALCOSA CI DEVE ESSERE...":return
+8050 if lo=18 then print "EPPURE QUALCOSA CI DEVE ESSERE...":return
 8060 if lo=21 then print "INSISTI, VEDO QUALCOSA...":return
 8070 if lo=20 then print "SE CI FOSSE MENO BUIO...":return
 8900 if rnd(0)>.5 then print "SONO NEI GUAI COME TE.":else print "MI HAI SCAMBIATO PER L'HOBBIT?"
