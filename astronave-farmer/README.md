@@ -52,9 +52,9 @@ computer, mi piacerebbe averne notizia in modo da aggiungere il programma alla l
 
 Adattamenti:
 
-- [Laser 500](). Questa è la versione più fedele all'originale per `MBasic` 
+- [Laser 500](astronave_farmer.laser500.bin). Questa è la versione più fedele all'originale per `MBasic` 
 di Mario Pettenghi, poichè il BASIC 1.0 del Laser 500 è perfettamente compatibile.
-Potete giocarci direttamente sul mio [emulatore on-line]().
+Potete giocarci direttamente sul mio [emulatore on-line](https://nippur72.github.io/laser500emu/?load=astronave_farmer.bin).
 
 - [Commodore 64](astronave_farmer.c64.prg). Adattato per girare a 40 colonne. In questa versione ho 
 dovuto simulare la funzione `INSTR()` che manca nel CBM BASIC V2.0; ho anche dovuto 
