@@ -92,16 +92,18 @@ ovest
 prendi portachiavi
 ovest
 prendi floppy disc
+est
 sud
 est
 est
 premi pulsante
-est 
+ovest
 usa ascensore
 est
 lascia tessera
 est
 inserisci floppy disc
+ovest
 nord
 esamina monitor
 sud
@@ -114,3 +116,5 @@ prendi torcia
 sud
 nord
 est
+nord
+accendi torcia
