@@ -200,5 +200,5 @@ REM *** ADATTAMENTO AL LASER 500 ***
 5 POKE &H85FB,PEEK(&H85FB) AND (255-8):REM turn off caps lock
 2075 E=7:RETURN
 2185 N=20:S=22:E=17:o=21:RETURN
-9999 rem "Digitato e adattato al Laser 500 da Antonino Porcino, Luglio 2019"
+19999 rem "Digitato e adattato al Laser 500 da Antonino Porcino, Luglio 2019"
 `);

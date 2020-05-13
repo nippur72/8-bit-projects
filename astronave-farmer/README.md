@@ -14,9 +14,9 @@ portarlo a compimento.
 
 Di Astronave Farmer, oltre all'avventura in sé, mi affascinava il fatto che il computer
 potesse comprendere le frasi digitate in lingua italiana, reagendo con un comportamento 
-intelligente. C'era un alone di mistero intorno al cosidetto "parser" - l'algoritmo
-che analizzava il testo inserito comprendendone il significato; proprio non avevo idea
-di come potesse funzionare!
+intelligente. C'era un alone di mistero intorno al cosidetto "parser", l'algoritmo
+che analizzava il testo inserito comprendendone il significato; proprio non avevo la 
+più pallida idea di come potesse funzionare, per me era quasi magico!
 
 Per molti anni ho cercato invano di ritrovare il listato di questo gioco, speravo che 
 prima o poi saltasse fuori da qualche parte. Non ero neanche sicuro del suo nome, poichè 
@@ -24,7 +24,7 @@ i miei amici lo avevano cambiato in "Astronave FARMET" (con la T finale); a dett
 loro "suonava meglio". 
 
 Poi finalmente il link giusto, ed ecco il numero di MC MicroComputer con il listato 
-bello e pubblicato in formato PDF!
+bello e pronto in formato PDF!
 
 Non potevo far altro che digitarlo e assaporare il piacere di giocarci nuovamente 
 dopo trent'anni, peraltro sullo stesso computer di allora, il Laser 500. Che emozione
@@ -35,7 +35,10 @@ con la maggior parte dei BASIC degli home computer dell'epoca poichè non utiliz
 nessuna istruzione specifica dello Sharp; i codici per pilotare lo schermo (`CLS` e 
 `NEWLINE`) sono parametrici per cui è molto facile adattarlo a qualsiasi macchina.
 
-Curiosamente il listato contiene due bug, uno dei quali impedisce il completamento
+Una curiosità: il finale del gioco è criptato tramite delle istruzioni `DATA`, l'autore
+ha voluto così evitare che venisse rivelato durante la digitazione del listato.
+
+Stranamente, il sorgente contiene due bug, uno dei quali impedisce il completamento
 dell'adventure. Alla linea `2185` manca l'istruzione `O=21` che collega l'uscita
 OVEST alla stanza n.21 sulla mappa, bloccando quindi il giocatore. 
 
@@ -53,7 +56,7 @@ Adattamenti:
 di Mario Pettenghi, poichè il BASIC 1.0 del Laser 500 è perfettamente compatibile.
 Potete giocarci direttamente sul mio [emulatore on-line]().
 
-- [Commodore 64](). Adattato per girare a 40 colonne. In questa versione ho 
+- [Commodore 64](astronave_farmer.c64.prg). Adattato per girare a 40 colonne. In questa versione ho 
 dovuto simulare la funzione `INSTR()` che manca nel CBM BASIC V2.0; ho anche dovuto 
 riscrivere alcuni `IF THEN ELSE` a causa della mancaza dell'istruzione `ELSE`.
 
@@ -61,8 +64,6 @@ riscrivere alcuni `IF THEN ELSE` a causa della mancaza dell'istruzione `ELSE`.
 originale è che l'istruzione `ELSE` nel BASIC del 128 deve essere preceduta dal 
 carattere `:` quando è sulla stessa riga dell'`IF`.
 
-- [Commodore 16](). Simile alla versione per C64.
-
-- [Commodore PET](). 
+- [Commodore 16/Plus 4](astronave_farmer.c16.prg). Simile alla versione 40 colonne per C64.
 
 
