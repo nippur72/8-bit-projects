@@ -6,7 +6,7 @@
 5 print cl$:poke 53280,0:poke 53281,0:poke 646,5
 6 print chr$(14):rem go lowercase
 10 goto 500
-20 input "COSA DEVO FARE";fr$:print :x=0:y=0
+20 input "COSA DEVO FARE{yellow}";fr$:print "{green}":x=0:y=0
 30 for j=1 to co:a$=fr$:b$=co$(j):gosub 11000:if i<>0 then x=j
 40 next:on x gosub 100,100,100,100,8000,9000,9500,9700:if x then return
 50 for j=1 to ve:a$=fr$:b$=ve$(j):gosub 11000:if i<>0 then x=j
@@ -16,11 +16,11 @@
 90 n=0:e=0:s=0:o=0:print be$;
 91 if lo>20 then on lo-20 gosub 2210,2220,2230,2240,2250,2260:goto 94
 92 on lo gosub 2000,2010,2020,2030,2040,2050,2060,2070,2080,2090,2100,2110,2120,2130,2140,2150,2160,2170,2180,2190,2200
-94 print :print "DIREZIONI: ";:if n then print "nord ";
+94 print :print "DIREZIONI: {white}";:if n then print "nord ";
 96 if e then print "est ";
 97 if s then print "sud ";
 98 if o then print "ovest ";
-99 return                                             
+99 print "{green}";:return                                             
 100 if lo=2 and x=3 and fl(1)=0  then print "LA PORTA DI SICUREZZA E' BLOCCATA!":return
 101 if lo=10 and x=2 and ogg(3) then print "SOLO GLI UFFICIALI POSSONO ENTRARE!":return
 102 if lo=17 and fl(6)=0 and x=4 then print "IL PORTELLONE NON SI APRE!!!":return
@@ -35,9 +35,10 @@
 140 if o=0 then 150
 141 lo=o:return           
 150 print "Non posso andare in quella direzione...":print :return
-200 print "OGGETTI VISIBILI:";
+200 print "OGGETTI VISIBILI: {white}";
 210 fl=0:for j=1 to ogg:if ogg(j)=lo then print tab(19);ogg$(j):fl=1
 220 next:if fl=0 then print tab(19);"nessuno"
+221 print "{green}";
 230 if lo=8 and fl(2)=0 then goto 9100
 300 print "--------------------------------------":return
 500 for j=1 to co:read co$(j):next
@@ -79,10 +80,17 @@
 1408 if y<>2 then print "ACCENDITI LA BARBA, IPPOGRIFO!":return
 1410 if lo=4 and ogg(6) then print "Dovrei avere anche una cassetta per"+chr$(13)+"farlo!":return
 1420 if lo<>4 then print "Dove lo trovo? Su Audio Review?":return
-1440 print "OK.. C'e' un messaggio:";dx$:print "SEI STATO RISVEGLIATO"+chr$(13)+"DALL'IBERNAZIONE PER UNA MISSIONE DI"+chr$(13)+"EMERGENZA!"
-1450 print "L'ASTRONAVE FARMER HA AVUTO"+chr$(13)+"UN'AVARIA. DEVI RIPROGRAMMARE IL"+chr$(13)+"COMPUTER DI BORDO PER UN"+chr$(13)+"ATTERRAGGIO DI FORTUNA."
-1460 print "PER FARLO TI SERVE UN FLOPPY DISC"+chr$(13)+"CHE CONTIENE I DATI NECESSARI."+chr$(13)+"TROVALO E INSERISCILO NEL LETTORE"+chr$(13)+"DEL COMPUTER DI BORDO."
-1470 print "E' IN GIOCO ANCHE LA TUA VITA."+chr$(13)+"AUGURI.":return
+1440 print "OK.. C'e' un messaggio:"            
+1441 print "SEI STATO RISVEGLIATO DALL'IBERNAZIONE"
+1442 print "PER UNA MISSIONE DI EMERGENZA!"
+1443 print "L'ASTRONAVE FARMER HA AVUTO UN'AVARIA." 
+1444 print "DEVI RIPROGRAMMARE IL COMPUTER DI BORDO"
+1445 print "PER UN ATTERRAGGIO DI FORTUNA. PER FARLO";
+1446 print "TI SERVE UN FLOPPY DISC CHE CONTIENE I "
+1447 print "DATI NECESSARI. TROVALO E INSERISCILO "
+1448 print "NEL LETTORE DEL COMPUTER DI BORDO."
+1449 print "E' IN GIOCO ANCHE LA TUA VITA. AUGURI."
+1471 return
 1500 if lo=13 and y=15 then print "Le luci vacillano per un istante."+chr$(13)+"Tutto ok.":fl(5)=1:return
 1590 print "Forse una petunia ha un Q.I."+chr$(13)+"superiore al tuo...":return
 1600 if y=0 then print "Ora ti apriro' il cranio se continui"+chr$(13)+"a dire scemate!":return
@@ -212,8 +220,8 @@
 10043 data 95,51,103,88,96,99,92,98,51,84,95,92
 10044 data 88,97,98,58,52,65,65,65,255
 11000 rem instr(A$,B$) returns I
-11010 for i=1 to len(a$)-len(b$)+1
-11030 if mid$(a$,i,len(b$))=b$ then return
+11010 k=len(b$):for i=1 to len(a$)-k+1
+11030 if mid$(a$,i,k)=b$ then return
 11050 next i
 11060 i=0:return
 
