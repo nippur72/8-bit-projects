@@ -1,0 +1,41 @@
+
+0 rem 42 by antonino porcino
+1 rem nino.porcino@gmail.com
+3 rem 17/05/2020
+7 poke 36879,8
+8 gosub 200:x=0:y=0
+10 zx=rnd(1)*40
+11 zy=rnd(1)*148
+15 k=0
+20 x=x*0.9+zx*0.1
+21 y=y*0.9+zy*0.1
+100 poke 36864,x
+101 poke 36865,y
+151 k=k+1
+152 if k=10 then goto 10
+160 goto 20
+199 rem === stampa il numero 42 a video ===
+200 print "{clr}{cyan}"
+210 for y=0 to 7 step .5
+220 c=peek(33184+y)
+230 z=128:forx=7to0step-1
+240 if c and z then print "{reverse on} {reverse off}";:goto 250
+245 print " ";
+250 z=z/2:next
+251 c=peek(33168+y)
+252 z=128:forx=7to0step-1
+253 if c and z then print "{reverse on} {reverse off}";:goto 255
+254 print " ";
+255 z=z/2:next
+256 print
+257 next
+260 return
+
+
+
+
+
+
+
+
+
