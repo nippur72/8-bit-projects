@@ -1,0 +1,40 @@
+;
+; debug: SIEL_START: byte 255-128, 255, 255, 255, 255, 255, 255, 255
+;
+
+const SIEL_START  = 57088
+const SIEL_LENGTH = 7
+const SIEL_NKEYS  = 56      ; 49 tasti reali, i rimanenti sono fantasma
+
+// =====================================================================================
+// legge la tastiera SIEL e memorizza lo stato dei tasti premuti
+// in chiaro nel buffer "curr_key_status"
+// =====================================================================================
+
+bit_counter: byte
+
+sub read_siel()
+   ldy #0                           ; y points to curr_key_status 
+   for x=#0 to #SIEL_LENGTH         ; x points to SIEL keyboard read ports
+      ld bit_counter, #8            ; for each byte, counts 8 bits
+
+      lda SIEL_START,x              ; reads the SIEL keyboard
+
+      ; loop that decodes the SIEL
+      ; byte into separate bits
+      do
+         asl                        ; carry <= 7th bit  
+         pha                        ; save the reading byte
+         if not carry then      
+            lda #KEY_PRESSED        ; 0 = key is pressed
+         else 
+            lda #KEY_RELEASED       ; 1 = key not pressed
+         end if
+         sta curr_key_status,y      ; write into curr_key_status
+         pla                        ; retrieves the reading byte
+         iny                        ; advance to next destination location
+         
+         dec bit_counter            ; loops over 8 bits
+      loop while not zero
+   next
+end sub

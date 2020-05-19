@@ -1,0 +1,273 @@
+   processor 6502
+
+   include <macros.lm>
+   include <macros_16.lm>
+   include <c64.lm>
+
+   org BASIC_RAM
+
+   basic start
+      100 print chr$(14)"{clr}{white}c64 piano by Nino Porcino";
+      110 poke 54272+24,15:rem full volume     
+      120 w=2:rem waveform 0-3     
+      140 a=5:rem attack 0-15
+      150 d=5:rem decay 0-15
+      160 s=15:rem sustain 0-15
+      170 r=5:rem release 0-15        
+      200 poke {REG4},w*16
+      210 poke {REG5},a*16+d
+      220 poke {REG6},s*16+r
+      300 sys {main}
+   basic end
+
+   include "siel.lm"
+   include "c64_keyboard.lm"
+   include "freq.lm"
+
+; ============ VOCI SID =============
+const SID1 = $D400
+const SID2 = $D420
+const NVOCI = 6
+
+; impostazioni SID per tutte le voci
+dim REG4 as byte   ; waveform + gate a zero
+dim REG5 as byte   ; attack + decay
+dim REG6 as byte   ; sustain + release
+
+; ===== tasti premuti ====
+const KEY_RELEASED  = 0
+const KEY_PRESSED   = 1
+last_key_status: ds SIEL_NKEYS, KEY_RELEASED    ; i tasti premuti al passaggio precedente
+curr_key_status: ds SIEL_NKEYS, KEY_RELEASED    ; i tasti attualmente premuti
+new_key_pressed: ds SIEL_NKEYS, KEY_RELEASED    ; i nuovi tasti premuti rispetto al passaggio precedente
+
+; ===== tasti collegati alle voci ====
+const VOICE_NONE = 255
+key_voices: ds SIEL_NKEYS, VOICE_NONE      ; quale voce (0..NVOCI-1) sta suonando il tasto
+
+; ==== stato delle voci del SID ====
+const VOICE_STOPPED = 0
+const VOICE_PLAYING = 1
+stato_voci: ds NVOCI, VOICE_STOPPED        ; stato delle voci dei SID (VOICE_STOPPED, VOICE_PLAYING)
+
+// =====================================================================================
+// stampa a video i buffer a scopo di debug
+// =====================================================================================
+sub dump_buffers()
+   for x=#0 to #SIEL_NKEYS-1
+      lda curr_key_status,x
+      sta VIDEO_RAM,x
+
+      lda last_key_status,x
+      sta VIDEO_RAM+SCREEN_COLS*4,x
+
+      lda new_key_pressed,x
+      sta VIDEO_RAM+SCREEN_COLS*8,x
+
+      lda key_voices,x
+      sta VIDEO_RAM+SCREEN_COLS*12,x
+   next
+
+   for x=#0 to #NVOCI-1
+      lda stato_voci,x
+      sta VIDEO_RAM+SCREEN_COLS*16,x
+   next
+end sub
+
+// =====================================================================================
+// main (entry point dal BASIC)
+// =====================================================================================
+
+sub main()
+   jsr init_sid             ; inizializza tutte le voci del SID
+   jsr main_loop            
+end sub
+
+// =====================================================================================
+// main loop 
+// =====================================================================================
+
+sub main_loop()
+   jsr copy_curr_in_last    ; copia i tasti correnti in "last_key_status"
+
+   jsr read_siel            ; legge tastiera SIEL
+   
+   ;jsr simulate_siel        ; legge tastiera del C64 emulando la SIEL  
+
+   jsr stop_released_keys   ; ferma le voci i cui tasti sono stati rilasciati
+
+   jsr calc_new_key_pressed ; rileva i nuovi tasti premuti
+
+   jsr dump_buffers         ; debug a video 
+
+   jsr play_new_keys        ; suona i nuovi tasti
+
+   jmp main_loop            ; loopa per sempre
+end sub
+
+sub init_sid()
+   ; inizializza tutte le voci del SID
+   ;ld SID1+[0*7]+4, REG4     
+   ;ld SID1+[1*7]+4, REG4
+   ;ld SID1+[2*7]+4, REG4
+   ;ld SID2+[0*7]+4, REG4     
+   ;ld SID2+[1*7]+4, REG4
+   ;ld SID2+[2*7]+4, REG4
+
+   ; attack-decay
+   ld SID1+[0*7]+5, REG5     
+   ld SID1+[1*7]+5, REG5
+   ld SID1+[2*7]+5, REG5
+   ld SID2+[0*7]+5, REG5     
+   ld SID2+[1*7]+5, REG5
+   ld SID2+[2*7]+5, REG5
+
+   ; sustain release
+   ld SID1+[0*7]+6, REG6     
+   ld SID1+[1*7]+6, REG6
+   ld SID1+[2*7]+6, REG6
+   ld SID2+[0*7]+6, REG6     
+   ld SID2+[1*7]+6, REG6
+   ld SID2+[2*7]+6, REG6
+end sub
+
+// =====================================================================================
+// copia il buffer curr_key_status in last_key_status in modo da poter rilevare i tasti
+// premuti o rilasciati rispetto al passo precedente
+// =====================================================================================
+
+sub copy_curr_in_last() 
+   for x=#0 to #SIEL_NKEYS-1
+      lda curr_key_status,x
+      sta last_key_status,x
+   next
+end sub
+
+// =====================================================================================
+// ferma le voci dei tasti rilasciati
+// =====================================================================================
+
+sub stop_released_keys() 
+   for x=#0 to #(SIEL_NKEYS-1)
+      lda last_key_status,x
+      if a=#KEY_PRESSED then
+         lda curr_key_status,x
+         if a=#KEY_RELEASED then
+            jsr rilascia_tasto_x
+         end if      
+      end if
+   next
+end sub
+
+;
+; rilascia il tasto indicato nel registro X
+;
+sub rilascia_tasto_x()
+   lda key_voices,x            ; 
+   tay                         ; y = quale voce stava suonando il tasto x
+
+   ; se il tasto stava suonando una voce
+   if a<>#VOICE_NONE then      
+
+      lda #VOICE_STOPPED          ; marca la voce y come VOICE_STOPPED
+      sta stato_voci,y            ; 
+
+      lda #VOICE_NONE             ; marca il tasto come nessuna voce
+      sta key_voices,x            ;
+
+      ; silenzia il SID associato alla voce
+      ; abbassa il bit "gate" del registro S+4
+      ; TODO trovare un modo più elegante
+      
+      lda REG4                         ; carica waveform + gate = 0 in S+4
+      if y=#0 then sta SID1+[0*7]+4     
+      if y=#1 then sta SID1+[1*7]+4     
+      if y=#2 then sta SID1+[2*7]+4     
+      if y=#3 then sta SID2+[0*7]+4     
+      if y=#4 then sta SID2+[1*7]+4     
+      if y=#5 then sta SID2+[2*7]+4     
+            
+   end if
+end sub
+
+// =====================================================================================
+// scrive in new_key_pressed i nuovi tasti premuti rispetto a last_key_status
+// =====================================================================================
+
+sub calc_new_key_pressed() 
+   for x=#0 to #SIEL_NKEYS-1
+      lda last_key_status,x
+      if a=#KEY_RELEASED then
+         lda curr_key_status,x         
+      else
+         lda #KEY_RELEASED         
+      end if
+      sta new_key_pressed,x
+   next
+end sub
+
+// =====================================================================================
+// suona i nuovi tasti premuti
+// =====================================================================================
+
+sub play_new_keys() 
+   for x=#0 to #SIEL_NKEYS-1
+      lda new_key_pressed,x
+      if a=#KEY_PRESSED then
+         jsr play_new_key_x
+      end if
+   next
+end sub
+
+;
+; suona il tasto premuto nel registro X
+;
+
+sub play_new_key_x()
+   ; trova la prima voce libera
+   for y=#0 to #NVOCI-1
+      lda stato_voci,y
+      if a=#VOICE_STOPPED then
+         jsr play_voice_y_key_x
+         exit sub
+      end if
+   next
+end sub
+
+sub play_voice_y_key_x()
+   tya                       ; indica che il tasto suona la voce y
+   sta key_voices,x          ;
+   
+   lda #VOICE_PLAYING        ; indica che la voce y sta suonando
+   sta stato_voci,y          ;        
+   
+   ; scrive frequenza byte basso + byte alto
+
+   lda FREQTABLE_LOW,x       
+   if y=#0 then sta SID1+[0*7]+0
+   if y=#1 then sta SID1+[1*7]+0
+   if y=#2 then sta SID1+[2*7]+0
+   if y=#3 then sta SID2+[0*7]+0
+   if y=#4 then sta SID2+[1*7]+0
+   if y=#5 then sta SID2+[1*7]+0
+
+   lda FREQTABLE_HI,x       
+   if y=#0 then sta SID1+[0*7]+1
+   if y=#1 then sta SID1+[1*7]+1
+   if y=#2 then sta SID1+[2*7]+1
+   if y=#3 then sta SID2+[0*7]+1
+   if y=#4 then sta SID2+[1*7]+1
+   if y=#5 then sta SID2+[1*7]+1
+
+   ; scrive gate
+
+   lda REG4                         ; carica waveform 
+   or  #1                           ; + gate = 1 in S+4
+
+   if y=#0 then sta SID1+[0*7]+4    
+   if y=#1 then sta SID1+[1*7]+4    
+   if y=#2 then sta SID1+[2*7]+4    
+   if y=#3 then sta SID2+[0*7]+4    
+   if y=#4 then sta SID2+[1*7]+4    
+   if y=#5 then sta SID2+[2*7]+4    
+end sub
