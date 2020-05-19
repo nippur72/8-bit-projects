@@ -24,3 +24,6 @@ c64-multiplexer/*.asm
 c64-multiplexer/*.lst
 c64-multiplexer/*.err
 c64-triplette-pitagoriche/.vscode/
+c64-piano/*.asm
+c64-piano/*.lst
+c64-piano/*.err
