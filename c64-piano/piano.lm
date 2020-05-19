@@ -137,7 +137,7 @@ end sub
 // =====================================================================================
 
 sub copy_curr_in_last() 
-   for x=#0 to #SIEL_NKEYS-1
+   for x=#0 to #(SIEL_NKEYS-1)
       lda curr_key_status,x
       sta last_key_status,x
    next
@@ -195,7 +195,7 @@ end sub
 // =====================================================================================
 
 sub calc_new_key_pressed() 
-   for x=#0 to #SIEL_NKEYS-1
+   for x=#0 to #(SIEL_NKEYS-1)
       lda last_key_status,x
       if a=#KEY_RELEASED then
          lda curr_key_status,x         
@@ -225,7 +225,7 @@ end sub
 
 sub play_new_key_x()
    ; trova la prima voce libera
-   for y=#0 to #NVOCI-1
+   for y=#0 to #(NVOCI-1)
       lda stato_voci,y
       if a=#VOICE_STOPPED then
          jsr play_voice_y_key_x

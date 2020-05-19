@@ -23,7 +23,7 @@ sub read_siel()
       ; loop that decodes the SIEL
       ; byte into separate bits
       do
-         asl                        ; carry <= 7th bit  
+         lsr                        ; carry <= 0th bit  
          pha                        ; save the reading byte
          if not carry then      
             lda #KEY_PRESSED        ; 0 = key is pressed
