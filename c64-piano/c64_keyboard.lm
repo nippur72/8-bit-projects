@@ -136,24 +136,47 @@ const KEY_POUND    = %11111110  ; row 6
 const KEY_1        = %11111110  ; row 7
 
 sub simulate_siel()
-   ; per adesso solo "q2w3er5t6y7u8i9op"
-   simk #KEYBOARD_ROW_7, #KEY_Q, curr_key_status+0
-   simk #KEYBOARD_ROW_7, #KEY_2, curr_key_status+1
-   simk #KEYBOARD_ROW_1, #KEY_W, curr_key_status+2
-   simk #KEYBOARD_ROW_1, #KEY_3, curr_key_status+3
-   simk #KEYBOARD_ROW_1, #KEY_E, curr_key_status+4
-   simk #KEYBOARD_ROW_2, #KEY_R, curr_key_status+5
-   simk #KEYBOARD_ROW_2, #KEY_5, curr_key_status+6
-   simk #KEYBOARD_ROW_2, #KEY_T, curr_key_status+7
-   simk #KEYBOARD_ROW_2, #KEY_6, curr_key_status+8
-   simk #KEYBOARD_ROW_3, #KEY_Y, curr_key_status+9
-   simk #KEYBOARD_ROW_3, #KEY_7, curr_key_status+10
-   simk #KEYBOARD_ROW_3, #KEY_U, curr_key_status+11
-   simk #KEYBOARD_ROW_4, #KEY_I, curr_key_status+12
-   simk #KEYBOARD_ROW_4, #KEY_9, curr_key_status+13
-   simk #KEYBOARD_ROW_4, #KEY_O, curr_key_status+14
-   simk #KEYBOARD_ROW_4, #KEY_0, curr_key_status+15
-   simk #KEYBOARD_ROW_5, #KEY_P, curr_key_status+16   
+   ; fila superiore
+   simk #KEYBOARD_ROW_7, #KEY_Q, curr_key_status+12
+   simk #KEYBOARD_ROW_7, #KEY_2, curr_key_status+13
+   simk #KEYBOARD_ROW_1, #KEY_W, curr_key_status+14
+   simk #KEYBOARD_ROW_1, #KEY_3, curr_key_status+15
+   simk #KEYBOARD_ROW_1, #KEY_E, curr_key_status+16
+   simk #KEYBOARD_ROW_2, #KEY_R, curr_key_status+17
+   simk #KEYBOARD_ROW_2, #KEY_5, curr_key_status+18
+   simk #KEYBOARD_ROW_2, #KEY_T, curr_key_status+19
+   simk #KEYBOARD_ROW_2, #KEY_6, curr_key_status+20
+   simk #KEYBOARD_ROW_3, #KEY_Y, curr_key_status+21
+   simk #KEYBOARD_ROW_3, #KEY_7, curr_key_status+22
+   simk #KEYBOARD_ROW_3, #KEY_U, curr_key_status+23
+   simk #KEYBOARD_ROW_4, #KEY_I, curr_key_status+24
+   simk #KEYBOARD_ROW_4, #KEY_9, curr_key_status+25
+   simk #KEYBOARD_ROW_4, #KEY_O, curr_key_status+26
+   simk #KEYBOARD_ROW_4, #KEY_0, curr_key_status+27
+   simk #KEYBOARD_ROW_5, #KEY_P, curr_key_status+28   
+
+   ; fila inferiore
+   simk #KEYBOARD_ROW_1, #KEY_Z,     curr_key_status+0
+   simk #KEYBOARD_ROW_1, #KEY_S,     curr_key_status+1
+   simk #KEYBOARD_ROW_2, #KEY_X,     curr_key_status+2
+   simk #KEYBOARD_ROW_2, #KEY_D,     curr_key_status+3
+   simk #KEYBOARD_ROW_2, #KEY_C,     curr_key_status+4
+   simk #KEYBOARD_ROW_3, #KEY_V,     curr_key_status+5
+   simk #KEYBOARD_ROW_3, #KEY_G,     curr_key_status+6
+   simk #KEYBOARD_ROW_3, #KEY_B,     curr_key_status+7
+   simk #KEYBOARD_ROW_3, #KEY_H,     curr_key_status+8
+   simk #KEYBOARD_ROW_4, #KEY_N,     curr_key_status+9
+   simk #KEYBOARD_ROW_4, #KEY_J,     curr_key_status+10
+   simk #KEYBOARD_ROW_4, #KEY_M,     curr_key_status+11
+   
+   /*
+   simk #KEYBOARD_ROW_5, #KEY_COMMA, curr_key_status+12
+   simk #KEYBOARD_ROW_5, #KEY_L,     curr_key_status+13
+   simk #KEYBOARD_ROW_5, #KEY_DOT,   curr_key_status+14
+   simk #KEYBOARD_ROW_5, #KEY_COLON, curr_key_status+15
+   simk #KEYBOARD_ROW_6, #KEY_SLASH, curr_key_status+16   
+   */
+
 end sub
 
 macro simk const, const, mem
