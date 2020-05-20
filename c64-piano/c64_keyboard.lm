@@ -176,7 +176,6 @@ sub simulate_siel()
    simk #KEYBOARD_ROW_5, #KEY_COLON, curr_key_status+15
    simk #KEYBOARD_ROW_6, #KEY_SLASH, curr_key_status+16   
    */
-
 end sub
 
 macro simk const, const, mem
@@ -188,4 +187,11 @@ macro simk const, const, mem
    else
       ld {3}, #KEY_RELEASED
    end if
+end macro
+
+macro is_pressed const, const
+   lda #{1}
+   sta $dc00	    ; query keyboard row on CIA1 port a 
+   lda $dc01       ; retrieve the keyboard row from CIA 1 port b      
+   eor #{2}
 end macro
