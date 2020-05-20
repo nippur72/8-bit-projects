@@ -7,17 +7,65 @@
    org BASIC_RAM
 
    basic start
-      100 print chr$(14)"{clr}{white}c64 piano by Nino Porcino";
-      110 poke 54272+24,15:rem full volume     
-      120 w=2:rem waveform 0-3     
-      140 a=5:rem attack 0-15
-      150 d=5:rem decay 0-15
-      160 s=15:rem sustain 0-15
-      170 r=5:rem release 0-15        
-      200 poke {REG4},w*16
-      210 poke {REG5},a*16+d
-      220 poke {REG6},s*16+r
-      300 sys {main}
+       10 dimwf$(3)
+       20 wf$(0)=chr$(206)+chr$(205)
+       30 wf$(1)=chr$(206)+chr$(180)
+       40 wf$(2)=chr$(207)+chr$(204)
+       50 wf$(3)=chr$(166)+chr$(166)
+       60 h$=chr$(157)
+       70 w=1:rem waveform 0-3     
+       80 a=5:rem attack 0-15
+       90 d=5:rem decay 0-15
+      100 s=15:rem sustain 0-15
+      110 r=5:rem release 0-15
+      115 gosub63000:rem pulse wave setting
+      120 print chr$(142)"{clr}{white}c64 piano by Nino Porcino";
+      130 poke 54272+24,15:rem full volume     
+      140 gosub 60000     
+      150 gosub 61000
+      160 gosub 62000
+      170 sys {main}
+      180 ifpeek(251)=7thenend
+      190 ifpeek(251)=1then210
+      200 print"unexpected condition":end
+      210 print"{down}change settings{down}"
+      220 print"1-attack"
+      230 print"2-decay"
+      240 print"3-sustain"
+      250 print"4-release"
+      260 print"5-waveform"
+      270 print:input"your choice";c
+      280 oncgosub300,310,320,330,340
+      290 goto 120
+      300 input"attack (0-15)";a:return
+      310 input"decay (0-15)";d:return
+      320 input"sustain (0-15)";s:return
+      330 input"release (0-15)";r:return
+      340 input"waveform (0-3)";w:return
+    19999 end
+    60000 print"{home}{down}{down}ATTACK  :";a
+    60010 print"DECAY   :";d;h$;"   "
+    60020 print"SUSTAIN :";s;h$;"   "
+    60030 print"RELEASE :";r;h$;"   "
+    60040 print"WAVEFORM: ";wf$(w)
+    60999 return
+    61000 poke {REG4},2^(w+4)
+    61010 poke {REG5},a*16+d
+    61020 poke {REG6},s*16+r
+    61999 return
+    62000 print"{home}{down}{down}{down}{down}{down}{down}{down}{down}Press:{down}"
+    62010 print"F1 - to change parameters"
+    62020 print"F7 - to exit"
+    62999 return
+    63000 rem initialize pulse wave
+    63010 hi=10:lo=10
+    63020 poke54274,hi:poke54275,lo
+    63030 poke54281,hi:poke54282,lo
+    63040 poke54288,hi:poke54289,lo
+    63050 poke54274+32,hi:poke54275+32,lo
+    63060 poke54281+32,hi:poke54282+32,lo
+    63070 poke54288+32,hi:poke54289+32,lo
+    63999 return
    basic end
 
    include "siel.lm"
@@ -79,8 +127,10 @@ end sub
 // =====================================================================================
 
 sub main()
+   sei
    jsr init_sid             ; inizializza tutte le voci del SID
-   jsr main_loop            
+   jsr main_loop   
+   rts         
 end sub
 
 // =====================================================================================
@@ -90,19 +140,30 @@ end sub
 sub main_loop()
    jsr copy_curr_in_last    ; copia i tasti correnti in "last_key_status"
 
-   jsr read_siel            ; legge tastiera SIEL
+   ;jsr read_siel            ; legge tastiera SIEL
    
-   ;jsr simulate_siel        ; legge tastiera del C64 emulando la SIEL  
+   jsr simulate_siel        ; legge tastiera del C64 emulando la SIEL  
 
    jsr stop_released_keys   ; ferma le voci i cui tasti sono stati rilasciati
 
    jsr calc_new_key_pressed ; rileva i nuovi tasti premuti
-
+#ifdef DEBUG
    jsr dump_buffers         ; debug a video 
-
+#endif
    jsr play_new_keys        ; suona i nuovi tasti
 
-   jmp main_loop            ; loopa per sempre
+   ld $fb, #0
+   is_pressed #KEYBOARD_ROW_0, #KEY_F1
+   if a=#0 then
+      ld $fb, #1
+   end if
+   is_pressed #KEYBOARD_ROW_0, #KEY_F7
+   if a=#0 then
+      ld $fb, #7
+   end if
+   lda $fb
+   beq main_loop
+   rts
 end sub
 
 sub init_sid()
