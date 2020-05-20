@@ -129,7 +129,22 @@ end sub
 sub main()
    sei
    jsr init_sid             ; inizializza tutte le voci del SID
-   jsr main_loop       
+
+   do
+      jsr main_loop       
+
+      ld $fb, #0
+      is_pressed #ROW_KEY_F1, #KEY_F1
+      if zero then 
+         ld $fb, #1         
+      end if
+      is_pressed #ROW_KEY_F7, #KEY_F7
+      if zero then
+         ld $fb, #7         
+      end if
+   loop while $fb = #0
+
+   ; exit to basic
 end sub
 
 // =====================================================================================
@@ -150,19 +165,6 @@ sub main_loop()
    #ifdef DEBUG then jsr dump_buffers ; debug a video 
 
    jsr play_new_keys        ; suona i nuovi tasti
-
-   ld $fb, #0
-   is_pressed #ROW_KEY_F1, #KEY_F1
-   if zero then
-      ld $fb, #1
-      rts
-   end if
-   is_pressed #ROW_KEY_F7, #KEY_F7
-   if zero then
-      ld $fb, #7
-      rts
-   end if
-   jmp main_loop
 end sub
 
 sub init_sid()
