@@ -47,7 +47,7 @@
       330 input "release (0-15)";r:return
       340 input "waveform (0-3)";w:return
     19999 end
-    60000 print "{home}{down}{down}ATTACK  :";a
+    60000 print "{home}{down}{down}{down}ATTACK  :";a
     60010 print "DECAY   :";d;h$;"   "
     60020 print "SUSTAIN :";s;h$;"   "
     60030 print "RELEASE :";r;h$;"   "
