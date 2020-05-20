@@ -25,8 +25,8 @@
       150 gosub 61000
       160 gosub 62000
       170 sys {main}
-      180 ifpeek(251)=7thenend
-      190 ifpeek(251)=1then210
+      180 ifpeek({exit_code})=7thenend
+      190 ifpeek({exit_code})=1then210
       200 print"unexpected condition":end
       210 print"{down}change settings{down}"
       220 print"1-attack"
@@ -126,6 +126,8 @@ end sub
 // main (entry point dal BASIC)
 // =====================================================================================
 
+dim exit_code as byte at $fb
+
 sub main()
    sei
    jsr init_sid             ; inizializza tutte le voci del SID
@@ -133,16 +135,16 @@ sub main()
    do
       jsr main_loop       
 
-      ld $fb, #0
+      ld exit_code, #0
       is_pressed #ROW_KEY_F1, #KEY_F1
       if zero then 
-         ld $fb, #1         
+         ld exit_code, #1         
       end if
       is_pressed #ROW_KEY_F7, #KEY_F7
       if zero then
-         ld $fb, #7         
+         ld exit_code, #7         
       end if
-   loop while $fb = #0
+   loop while exit_code = #0
 
    ; exit to basic
 end sub
