@@ -129,8 +129,7 @@ end sub
 sub main()
    sei
    jsr init_sid             ; inizializza tutte le voci del SID
-   jsr main_loop   
-   rts         
+   jsr main_loop       
 end sub
 
 // =====================================================================================
@@ -153,17 +152,17 @@ sub main_loop()
    jsr play_new_keys        ; suona i nuovi tasti
 
    ld $fb, #0
-   is_pressed #KEYBOARD_ROW_0, #KEY_F1
-   if a=#0 then
+   is_pressed #ROW_KEY_F1, #KEY_F1
+   if zero then
       ld $fb, #1
+      rts
    end if
-   is_pressed #KEYBOARD_ROW_0, #KEY_F7
-   if a=#0 then
+   is_pressed #ROW_KEY_F7, #KEY_F7
+   if zero then
       ld $fb, #7
+      rts
    end if
-   lda $fb
-   beq main_loop
-   rts
+   jmp main_loop
 end sub
 
 sub init_sid()

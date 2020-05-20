@@ -135,6 +135,78 @@ const KEY_PLUS     = %11111110  ; row 5
 const KEY_POUND    = %11111110  ; row 6
 const KEY_1        = %11111110  ; row 7
 
+const ROW_KEY_STOP     = %11111110
+const ROW_KEY_SLASH    = %11111101
+const ROW_KEY_COMMA    = %11111011
+const ROW_KEY_N        = %11110111
+const ROW_KEY_V        = %11101111
+const ROW_KEY_X        = %11011111
+const ROW_KEY_LSHIFT   = %10111111
+const ROW_KEY_DOWN     = %01111111
+
+const ROW_KEY_F5       = %11111110
+const ROW_KEY_E        = %11111101
+const ROW_KEY_T        = %11111011
+const ROW_KEY_U        = %11110111
+const ROW_KEY_O        = %11101111
+const ROW_KEY_AT       = %11011111
+const ROW_KEY_POW      = %10111111
+const ROW_KEY_Q        = %01111111
+
+const ROW_KEY_F3       = %11111110
+const ROW_KEY_S        = %11111101
+const ROW_KEY_F        = %11111011
+const ROW_KEY_H        = %11110111
+const ROW_KEY_K        = %11101111
+const ROW_KEY_COLON    = %11011111
+const ROW_KEY_EQUAL    = %10111111
+const ROW_KEY_CBM      = %01111111
+
+const ROW_KEY_F1       = %11111110
+const ROW_KEY_Z        = %11111101
+const ROW_KEY_C        = %11111011
+const ROW_KEY_B        = %11110111
+const ROW_KEY_M        = %11101111
+const ROW_KEY_DOT      = %11011111
+const ROW_KEY_RSHIFT   = %10111111
+const ROW_KEY_SPACE    = %01111111
+
+const ROW_KEY_F7       = %11111110
+const ROW_KEY_4        = %11111101
+const ROW_KEY_6        = %11111011
+const ROW_KEY_8        = %11110111
+const ROW_KEY_0        = %11101111
+const ROW_KEY_MINUS    = %11011111
+const ROW_KEY_HOME     = %10111111
+const ROW_KEY_2        = %01111111
+
+const ROW_KEY_RIGHT    = %11111110
+const ROW_KEY_A        = %11111101
+const ROW_KEY_D        = %11111011
+const ROW_KEY_G        = %11110111
+const ROW_KEY_J        = %11101111
+const ROW_KEY_L        = %11011111
+const ROW_KEY_SCOLON   = %10111111
+const ROW_KEY_CONTROL  = %01111111
+
+const ROW_KEY_RETURN   = %11111110
+const ROW_KEY_W        = %11111101
+const ROW_KEY_R        = %11111011
+const ROW_KEY_Y        = %11110111
+const ROW_KEY_I        = %11101111
+const ROW_KEY_P        = %11011111
+const ROW_KEY_ASTERISK = %10111111
+const ROW_KEY_ESCAPE   = %01111111
+
+const ROW_KEY_DELETE   = %11111110
+const ROW_KEY_3        = %11111101
+const ROW_KEY_5        = %11111011
+const ROW_KEY_7        = %11110111
+const ROW_KEY_9        = %11101111
+const ROW_KEY_PLUS     = %11011111
+const ROW_KEY_POUND    = %10111111
+const ROW_KEY_1        = %01111111
+
 sub simulate_siel()
    ; fila superiore
    simk #KEYBOARD_ROW_7, #KEY_Q, curr_key_status+12
