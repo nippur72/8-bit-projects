@@ -147,9 +147,9 @@ sub main_loop()
    jsr stop_released_keys   ; ferma le voci i cui tasti sono stati rilasciati
 
    jsr calc_new_key_pressed ; rileva i nuovi tasti premuti
-#ifdef DEBUG
-   jsr dump_buffers         ; debug a video 
-#endif
+
+   #ifdef DEBUG then jsr dump_buffers ; debug a video 
+
    jsr play_new_keys        ; suona i nuovi tasti
 
    ld $fb, #0
