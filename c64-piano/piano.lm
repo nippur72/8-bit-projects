@@ -6,8 +6,6 @@
 
    org BASIC_RAM
 
-   basic start
-       10 dimwf$(3)
    basic start compact
        10 dim wf$(3)
        20 wf$(0)=chr$(206)+chr$(205)
@@ -160,10 +158,9 @@ end sub
 sub main_loop()
    jsr copy_curr_in_last    ; copia i tasti correnti in "last_key_status"
 
-   ;jsr read_siel            ; legge tastiera SIEL
+   #ifdef  KBD_SIEL then jsr read_siel       ; legge tastiera SIEL
+   #ifndef KBD_SIEL then jsr simulate_siel   ; legge tastiera del C64 emulando la SIEL  
    
-   jsr simulate_siel        ; legge tastiera del C64 emulando la SIEL  
-
    jsr stop_released_keys   ; ferma le voci i cui tasti sono stati rilasciati
 
    jsr calc_new_key_pressed ; rileva i nuovi tasti premuti
