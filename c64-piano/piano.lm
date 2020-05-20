@@ -21,7 +21,9 @@
       100 s=15:rem sustain 0-15
       110 r=5:rem release 0-15
       115 gosub 63000:rem pulse wave setting
-      120 print chr$(142)"{clr}{white}c64 piano by Nino Porcino";
+      120 print chr$(142)"{clr}{white}*** c64 piano ***"
+      125 print "by Nino Porcino & Francesco Sblendorio"
+      126 print
       130 poke 54272+24,15:rem full volume     
       140 gosub 60000     
       150 gosub 61000
