@@ -14,9 +14,9 @@ portarlo a compimento.
 
 Di Astronave Farmer, oltre all'avventura in sé, mi affascinava il fatto che il computer
 potesse comprendere le frasi digitate in lingua italiana, reagendo con un comportamento 
-intelligente. C'era un alone di mistero intorno al cosidetto "parser", l'algoritmo
+intelligente. C'era un alone di mistero intorno al cosiddetto "parser", l'algoritmo
 che analizzava il testo inserito comprendendone il significato; non avevo la 
-più pallida idea di come potesse funzionare, per me era quasi magico!
+più pallida idea di come potesse funzionare... per me era quasi magico!
 
 Per molti anni ho cercato invano di ritrovare il listato di questo gioco, speravo che 
 prima o poi saltasse fuori da qualche parte. Non ero neanche sicuro del suo nome, poichè 
@@ -64,12 +64,16 @@ Potete giocarci direttamente sul mio [emulatore on-line](https://nippur72.github
 
 - [Commodore 64](astronave_farmer.c64.prg): adattato per girare a 40 colonne. In questa versione ho 
 dovuto simulare la funzione `INSTR()` che manca nel CBM BASIC V2.0; ho anche dovuto 
-riscrivere alcuni `IF THEN ELSE` a causa della mancaza dell'istruzione `ELSE`.
+riscrivere alcuni `IF THEN ELSE` a causa della mancanza dell'istruzione `ELSE`.
 
 - [Commodore 128](astronave_farmer.c128.prg): in modalità 80 colonne. L'unica differenza col sorgente 
 originale è che l'istruzione `ELSE` nel BASIC del 128 deve essere preceduta dal 
 carattere `:` quando è sulla stessa riga dell'`IF`.
 
 - [Commodore 16/Plus 4](astronave_farmer.c16.prg): simile alla versione 40 colonne per C64.
+
+- [Amstrad CPC 464](astronave_farmer.cpc464.dsk): conversione effettuata da Francesco Fiorentini.
+
+- [TI-99/4A](astronave_farmer.ti994a.dsk): conversione effettuata da Francesco Fiorentini.
 
 
