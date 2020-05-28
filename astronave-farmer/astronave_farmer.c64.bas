@@ -192,9 +192,11 @@
 9210 read x:if x=255 then 9230
 9220 print chr$(x-ogg(8)-lo);:goto 9210
 9230 print : print dx$;"***COMPLIMENTI***";dx$:end
-9500 print cl$;be$;"ASTRONAVE FARMER (Avventura 1)********************************"
+9500 print cl$;be$;"ASTRONAVE FARMER (Avventura 1)"
+9501 print "********************************"
 9510 print dx$;"(C) 1984 Mario Pettenghi"
-9511 print dx$;"Digitato e adattato al C64 da Antonino Porcino, Luglio 2019";dx$
+9511 print dx$;"Digitato e adattato al C64 da "
+9512 print "Antonino Porcino, Luglio 2019";dx$
 9520 print "COMANDI RICONOSCIUTI:";dx$
 9530 for j=1 to ve:print ve$(j),:next:for j=1 to co:print co$(j),:next
 9540 print dx$;dx$;">PREMI UN TASTO PER RIPRENDERE IL GIOCO":get a$

@@ -62,9 +62,12 @@ Adattamenti:
 di Mario Pettenghi, poichè il BASIC del Laser 500 è perfettamente compatibile.
 Potete giocarci direttamente sul mio [emulatore on-line](https://nippur72.github.io/laser500emu/?load=astronave_farmer.bin).
 
-- [Commodore 64](astronave_farmer.c64.prg): adattato per girare a 40 colonne. In questa versione ho 
-dovuto simulare la funzione `INSTR()` che manca nel CBM BASIC V2.0; ho anche dovuto 
-riscrivere alcuni `IF THEN ELSE` a causa della mancanza dell'istruzione `ELSE`.
+- [Commodore 64](astronave_farmer.c64.mospeed.prg): adattato per girare a 40 colonne.
+In questa versione ho dovuto simulare la funzione `INSTR()` che manca nel
+CBM BASIC V2.0; ho anche dovuto riscrivere alcuni `IF THEN ELSE` a causa della mancanza
+dell'istruzione `ELSE`. Per velocizzare il gioco, ho compilato il listato BASIC
+con [Mospeed](https://github.com/EgonOlsen71/basicv2) (ma è anche possibile giocare
+con [la versione non compilata](astronave_farmer.c64.prg)).
 
 - [Commodore 128](astronave_farmer.c128.prg): in modalità 80 colonne. L'unica differenza col sorgente 
 originale è che l'istruzione `ELSE` nel BASIC del 128 deve essere preceduta dal 
