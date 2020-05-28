@@ -75,7 +75,7 @@ carattere `:` quando è sulla stessa riga dell'`IF`.
 
 - [Commodore 16/Plus 4](astronave_farmer.c16.prg): simile alla versione 40 colonne per C64.
 
-- [Amstrad CPC 464](astronave_farmer.cpc464.dsk): conversione effettuata da Francesco Fiorentini.
+- [Amstrad CPC](astronave_farmer.amstrad.dsk): conversione effettuata da Francesco Fiorentini.
 
 - [TI-99/4A](astronave_farmer.ti994a.dsk): conversione effettuata da Francesco Fiorentini.
 
