@@ -1,0 +1,183 @@
+   processor 6502
+
+   include <vic20.lm>
+   include <macros.lm>
+   include <macros_16.lm>
+
+;NTSC = 1  ; 6560-101: 65 cycles per raster line, 261 lines
+;PAL = 1   ; 6561-101: 71 cycles per raster line, 312 lines
+
+#ifdef PAL 
+   const LINES = 312
+   const CYCLES_PER_LINE = 71
+#endif
+
+#ifdef NTSC
+   const LINES = 261
+   const CYCLES_PER_LINE = 65
+#endif
+
+const FRAME_TIME = ( LINES * CYCLES_PER_LINE ) / 1 - 2
+
+  org BASIC_RAM
+  basic start
+     2008 sys {start}
+  basic end
+  
+start:
+  lda #$7f
+  sta $912e     ; disable and acknowledge interrupts
+  sta $912d
+  sta $911e     ; disable NMIs (Restore key)
+
+;synchronize with the screen
+sync:
+  ; wait for raster line n.08*2
+  ldx #9 : do : loop while x<>$9004
+   
+  ; at this stage, the inaccuracy is 7 clock cycles
+  ; the processor is in this place 2 to 9 cycles
+  ; after $9004 has changed
+    
+  ldy #9
+  bit $24
+  do
+    ldx $9004
+    txa
+    bit $24
+    #ifdef PAL then ldx #24
+    #ifdef NTSC then ldx #21
+    do : dex : loop while not zero
+    ; first spend some time (so that the whole loop will be 2 raster lines)
+    cmp $9004     ;     
+    bcs *+2       ; save one cycle if $9004 changed too late
+    dey
+  loop while not zero
+
+  nop : nop : nop : nop : nop : nop
+  nop : nop : nop : nop : nop : nop
+  nop : nop : nop : nop : nop : nop
+  nop : nop : nop : nop : nop : nop
+  nop : nop : nop : nop : nop : nop
+  nop : nop : nop
+
+  ; now it is fully synchronized
+  ; 6 cycles have passed since last $9004 change
+  ; and we are on line 2*(28+9)=74
+
+;initialize the timers
+
+timers:
+  lda #$40      ; enable Timer A free run of both VIAs
+  sta $911b
+  sta $912b
+
+  lda #<FRAME_TIME
+  ldx #>FRAME_TIME
+  sta $9116     ; load the timer low byte latches
+  sta $9126
+
+#ifdef PAL
+  ldy #7        ; make a little delay to get the raster effect to the
+  dey           ; right place
+  bne *-1
+  nop
+  nop
+#endif
+
+#ifdef NTSC
+  ldy #6
+  dey
+  bne *-1
+  bit $24
+#endif
+
+  stx $9125     ; start the IRQ timer A
+                ; 6560-101: 65 cycles from $9004 change
+                ; 6561-101: 77 cycles from $9004 change
+  ldy #10       ; spend some time (1+5*9+4=55 cycles)
+  dey           ; before starting the reference timer
+  bne *-1
+  stx $9115     ; start the reference timer
+
+pointers:
+  lda #<irq     ; set the raster IRQ routine pointer
+  sta $314
+  lda #>irq
+  sta $315
+  lda #$c0
+  sta $912e     ; enable Timer A underflow interrupts
+  rts           ; return
+
+irq:
+; irq (event)   ; > 7 + at least 2 cycles of last instruction (9 to 16 total)
+; pha           ; 3
+; txa           ; 2
+; pha           ; 3
+; tya           ; 2
+; pha           ; 3
+; tsx           ; 2
+; lda $0104,x   ; 4
+; and #xx       ; 2
+; beq           ; 3
+; jmp ($314)    ; 5
+
+                ; ---
+                ; 38 to 45 cycles delay at this stage
+
+  lda $9114     ; get the NMI timer A value
+                ; (42 to 49 cycles delay at this stage)
+; sta $1e00     ; uncomment these if you want to monitor
+; ldy $9115     ; the reference timer on the screen
+; sty $1e01
+  cmp #8        ; are we more than 7 cycles ahead of time?
+  bcc 0$
+  pha           ; yes, spend 8 extra cycles
+  pla
+  and #7        ; and reset the high bit
+0$:
+  cmp #4
+  bcc 1$
+  bit $24       ; waste 4 cycles
+  and #3
+1$:
+  cmp #2        ; spend the rest of the cycles
+  bcs *+2
+  bcs *+2
+  lsr
+  bcs *+2       ; now it has taken 82 cycles from the beginning of the IRQ
+
+effect:
+
+  ldy #$FF       ; perform amazing video effect
+  ldx #8
+
+0$:
+  lda #(8+5+5*16)
+  sta $900f
+  sta $900f
+  sta $900f
+  sta $900f
+  sta $900f
+
+  lda #(8+1+1*16)
+  sta $900f
+  sta $900f
+  sta $900f
+  sta $900f
+
+  lda #(8+2+2*16)
+  sta $900f
+  sta $900f
+  sta $900f
+  sta $900f
+  sta $900f
+
+  stx $900f
+
+  dey
+  bne 0$        ; end of amazing video effect
+
+  pha
+  pla
+  jmp $eabf     ; return to normal IRQ
