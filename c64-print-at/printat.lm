@@ -22,14 +22,14 @@ dim ptr as word at 224
 messaggio: 
    byte "HELLO WORLD", 0
 
-printat:
-   ; ptr = 1024 + xx
-   lda xx
-   sta ptr
-   lda #$04
-   sta ptr+1
+printat:   
+   lda xx      ;
+   sta ptr     ;
+   lda #$04    ;
+   sta ptr+1   ; ptr = 1024 + xx
+   
+   ; loop del tipo: while(yy>0) ptr+=40;
 
-   ; while(yy>0) { ptr+=40; yy--; }   
    ldy yy      
    beq printat1
 loop: 
@@ -42,6 +42,11 @@ loop:
    sta ptr+1   ; ptr += 40
    dey
    bne loop 
+
+   ;
+   ; ptr punta alla posizione sullo schermo
+   ; copia str su ptr fino a che incontra 0   
+   ;
 
    ldy #0
 printat1:      
