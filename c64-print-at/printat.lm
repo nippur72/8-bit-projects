@@ -1,0 +1,55 @@
+   processor 6502
+
+   include "macros.lm"
+   include "macros_16.lm"
+   include "c64.lm"
+
+   org BASIC_RAM
+
+   basic start
+      10 poke {yy},5
+      20 poke {xx},15      
+      30 poke {(str+0)},{messaggio} and 255
+      40 poke {(str+1)},{messaggio}/256      
+      50 sys {printat}
+   basic end
+
+dim xx  as byte at 220
+dim yy  as byte at 221
+dim str as word at 222
+dim ptr as word at 224
+
+messaggio: 
+   byte "HELLO WORLD", 0
+
+printat:
+   ; ptr = 1024 + xx
+   lda xx
+   sta ptr
+   lda #$04
+   sta ptr+1
+
+   ; while(yy>0) { ptr+=40; yy--; }   
+   ldy yy      
+   beq printat1
+loop: 
+   clc         ;  
+   lda ptr     ;
+   adc #40     ;
+   sta ptr     ;
+   lda #0      ;
+   adc ptr+1   ;
+   sta ptr+1   ; ptr += 40
+   dey
+   bne loop 
+
+   ldy #0
+printat1:      
+   lda (str),y
+   beq printat2:
+   sta (ptr),y
+   iny
+   bne printat1
+printat2:   
+   rts
+
