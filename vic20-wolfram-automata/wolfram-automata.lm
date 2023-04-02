@@ -1,0 +1,139 @@
+   processor 6502
+
+   include <macros.lm>
+   include <macros_16.lm>
+
+   #ifdef VIC20 then include <vic20.lm>
+   #ifdef C64   then include <c64.lm>
+
+   org BASIC_RAM
+
+basic start
+   10 sys {init}
+   15 print "{wht}{clr}"
+   20 input n
+   30 print "{clr}"
+   40 poke {n},n      
+   50 sys {start}
+   55 print "n ="n"{home}"
+   60 get a$:if a$="" then 60
+   70 n=(n+1) and 255
+   80 goto 40
+basic end
+
+; memorizza variabili di comodo in pagina zero
+dim n   as byte at $9e
+dim tmp as byte at $9f
+dim ptr as word at $a7
+
+const FULL  = 160   ; carattere pieno (spazio in reverse)
+const EMPTY = 32    ; carattere vuoto (spazio)
+
+const ENDVIDEO = VIDEO_RAM + (SCREEN_ROWS-1)*SCREEN_COLS
+const CENTERFIRSTROW = VIDEO_RAM+(SCREEN_COLS/2)
+
+init:
+   #ifdef VIC20
+      ld 36879, #8
+   #endif
+   #ifdef C64
+      ld 53280, #0
+      ld 53281, #0
+   #endif
+   rts
+
+start:
+   ; ripulisce la prima riga con spazi   
+   ldx #(SCREEN_COLS-1)
+   lda #EMPTY
+   do
+      sta VIDEO_RAM,x
+      dex
+   loop while not negative
+
+   ; scrive una "@" al centro della prima riga
+   lda #FULL
+   sta CENTERFIRSTROW
+
+   ; posiziona il cursore sull'ultima riga per il successivo PRINT da basic
+   ld16 CURSOR_PTR, #(VIDEO_RAM+(SCREEN_ROWS-1)*SCREEN_COLS)
+
+   ; cicla ptr da 7680 in poi, (per convenienza ptr punta a I-1, non a I)
+   ld16 ptr, #VIDEO_RAM
+ciclo:
+   ; legge la cella superiore a sinistra (i-1) e memorizza nel bit 5 di TMP
+   ldy #0
+   lda (ptr),y
+   and #128
+   lsr
+   lsr   
+   sta tmp
+
+   ; legge la cella superiore al centro (i) e memorizza nel bit 6 di TMP
+   iny
+   lda (ptr),y
+   and #128
+   lsr
+   or  tmp
+   sta tmp
+
+   ; legge la cella superiore a destra (i+1) e memorizza nel bit 7 di TMP
+   iny
+   lda (ptr),y
+   and #128
+   or  tmp
+
+   ; arrivati qui A (e TMP) contengono i valori delle celle nei bit 7,6,5 del byte (es: 11100000)
+   ; riportiamo nei primi 3 bit shiftando a destra 5 volte
+   lsr
+   lsr
+   lsr 
+   lsr 
+   lsr 
+   tay
+   
+   ; esegue il la potenza 2^A shiftando a sinistra il valore 1 per Y volte 
+   lda #1
+   while y<>#0
+      asl
+      dey
+   wend 
+   
+   ; si prepara per scrivere nella riga successiva (i+22)
+   ldy #(SCREEN_COLS+1)
+
+   ; esegue il test di wolfram sul pattern
+   and n
+
+   ; se zero scrive uno spazio il carattere pieno
+   if zero then 
+      lda #EMPTY
+   else
+      lda #FULL
+   end if
+   sta (ptr),y
+   
+   inc16 ptr              ; ptr = ptr + 1
+   cmp16 ptr, #(ENDVIDEO) ; se ptr non è arrivato a fine video
+   bne ciclo              ; allora next 
+   rts                    ; altrimenti ritorna al basic
+   
+/*
+============================================================
+REM SORGENTE BASIC PER RIFERIMENTO
+2 poke 36879,174:print chr$(147)
+4 n=150
+5 for i=7680 to 7700:poke i,32:next
+10 poke 7690,0
+20 for i=7681 to 8640
+21 a=peek(i-1)*4+peek(i)*2+peek(i+1)
+22 a=a/32
+23 a=2^a
+25 b=0
+26 if n and a then b=32
+30 poke i+22, b
+40 next
+50 n=n+1
+60 goto 20
+============================================================
+*/   
